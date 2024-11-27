@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <!-- Include SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body class="bg-black text-white min-h-screen">
+    <!-- Sidebar -->
+    <%- include("partials/sidebar")  %>
+
+    <!-- Main Content -->
+    <main class="ml-64 p-8">
+      <!-- Header -->
+      <header class="flex items-center justify-between mb-8">
+        <h1 class="text-2xl font-semibold text-gray-200">Customers</h1>
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search"
+              class="bg-gray-800 text-white p-2 rounded pl-10 focus:outline-none"
+            />
+            <button onclick="searchCustomers()" class="absolute right-3 top-2 text-gray-400">
+              <i class="material-icons">search</i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Customer Table -->
+      <div class="bg-zinc-800 rounded-lg p-6">
+        <table class="min-w-full text-left text-gray-400">
+          <thead>
+            <tr class="border-b border-gray-700">
+              <th class="py-3 px-4">S.No</th>
+              <th class="py-3 px-4">Name</th>
+              <th class="py-3 px-4">Email</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4">Action</th>
+            </tr>
+          </thead>
+          <tbody id="customerTableBody">
+            <% customers.forEach((customer, index) => { %>
+            <tr class="border-b border-gray-700">
+              <td class="py-3 px-4 text-white">
+                <%= (currentPage - 1) * 12 + index + 1 %>
+              </td>
+              <td class="py-3 px-4 text-white"><%= customer.fullName %></td>
+              <td class="py-3 px-4 text-white"><%= customer.email %></td>
+              <td
+                class="py-3 px-4 <%= customer.status === 'blocked' ? 'text-red-500' : 'text-white' %>"
+              >
+                <%= customer.status %>
+              </td>
+              <td class="py-3 px-4 flex space-x-2">
+                <button
+                  class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                  onclick="confirmUpdateStatus('<%= customer._id %>', 'active')"
+                >
+                  UnBlock
+                </button>
+                <button
+                  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  onclick="confirmUpdateStatus('<%= customer._id %>', 'blocked')"
+                >
+                  Block
+                </button>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="flex justify-center space-x-2 mt-4">
+          <% if (currentPage > 1) { %>
+          <a
+            href="/admin/customers?page=<%= currentPage - 1 %>"
+            class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-600"
+            >Previous</a
+          >
+          <% } %> 
+          <% for (let i = 1; i <= totalPages; i++) { %>
+          <a
+            href="/admin/customers?page=<%= i %>"
+            class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-600"
+            ><%= i %></a
+          >
+          <% } %> 
+          <% if (currentPage < totalPages) { %>
+          <a
+            href="/admin/customers?page=<%= currentPage + 1 %>"
+            class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-600"
+            >Next</a
+          >
+          <% } %>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Function to confirm status change (block/unblock)
+      function confirmUpdateStatus(customerId, status) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: `You are about to ${status === 'blocked' ? 'block' : 'unblock'} this customer.`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, confirm!',
+          cancelButtonText: 'Cancel',
+          reverseButtons: true
+        }).then((result) => {
+          if (result.isConfirmed) {
+            updateStatus(customerId, status);
+          }
+        });
+      }
+
+      // Function to update customer status
+      function updateStatus(customerId, status) {
+        fetch(`/admin/customers/updateStatus/${customerId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire(
+                'Success!',
+                `The customer has been ${status === 'blocked' ? 'blocked' : 'unblocked'} successfully.`,
+                'success'
+              ).then(() => {
+                location.reload(); // Reload the page after success
+              });
+            } else {
+              Swal.fire(
+                'Error!',
+                'There was an error updating the status.',
+                'error'
+              );
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            Swal.fire(
+              'Error!',
+              'An unexpected error occurred.',
+              'error'
+            );
+          });
+      }
+
+      function searchCustomers() {
+        const query = document.getElementById("searchInput").value.trim();
+        
+        if (query === "") {
+          // You can choose to show all customers if the query is empty
+          return;
+        }
+
+        fetch(`/admin/customers/search?query=${query}`)
+          .then((response) => response.json())
+          .then((data) => {
+            const tableBody = document.getElementById("customerTableBody");
+            tableBody.innerHTML = ""; // Clear current table rows
+
+            if (data.length === 0) {
+              tableBody.innerHTML =
+                '<tr><td colspan="5" class="text-center py-3">No customers found</td></tr>';
+              return;
+            }
+
+            // Render the search results
+            data.forEach((customer, index) => {
+              const row = document.createElement("tr");
+              row.className = "border-b border-gray-700";
+              row.innerHTML = ` 
+                <td class="py-3 px-4 text-white">${index + 1}</td>
+                <td class="py-3 px-4 text-white">${customer.fullName}</td>
+                <td class="py-3 px-4 text-white">${customer.email}</td>
+                <td class="py-3 px-4 ${customer.status === "blocked" ? "text-red-500" : "text-white"}">${customer.status}</td>
+                <td class="py-3 px-4 flex space-x-2">
+                  <button
+                    class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                    onclick="updateStatus('${customer._id}', 'active')"
+                  >
+                    UnBlock
+                  </button>
+                  <button
+                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                    onclick="updateStatus('${customer._id}', 'blocked')"
+                  >
+                    Block
+                  </button>
+                </td>
+              `;
+              tableBody.appendChild(row);
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching search results:", error);
+          });
+      }
+    </script>
+  </body>
+</html>
