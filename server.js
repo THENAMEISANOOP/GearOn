@@ -153,7 +153,7 @@ app.get("/auth/google/callback", (req, res, next) => {
 
       // Update the session with the user data
       req.session.user = user;
-      res.redirect("/home");
+      res.redirect("/");
     });
   })(req, res, next);
 });

@@ -125,7 +125,7 @@
   <!-- Select Color -->
   <div class="mt-6">
     <label for="color" class="block font-medium text-gray-400">Select Color</label>
-    <select id="color" class="mt-2 px-4 py-2 border rounded-lg shadow-sm bg-green-400">
+    <select id="color" class="mt-2 px-4 py-2 border rounded-lg shadow-sm bg-grey-900">
       <% product.variants.forEach(variant => { %>
         <option><%= variant.color || 'N/A' %></option>
       <% }) %>
@@ -134,10 +134,11 @@
 
   <!-- Action Buttons -->
   <div class="mt-8 flex space-x-4">
-    <button class="px-6 py-3 bg-yellow-400 text-black rounded-lg font-bold shadow-md hover:bg-yellow-800">
+    <button class="px-6 py-3 bg-[rgba(235,246,0,255)] text-black rounded-lg font-bold shadow-md hover:bg-yellow-200">
       Buy Now
     </button>
-    <button class="px-6 py-3 bg-red-600 rounded-lg font-bold shadow-md hover:bg-gray-300">
+    
+    <button class="px-6 py-3 bg-white rounded-lg font-bold shadow-md hover:bg-gray-300">
       Add To Cart
     </button>
   </div>

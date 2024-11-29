@@ -106,5 +106,82 @@
 </div>
 
 
+<script>
+  document.getElementById("variantForm").addEventListener("submit", function (e) {
+    const color = document.getElementById("color");
+    const price = document.getElementById("price");
+    const discountPrice = document.getElementById("discountPrice");
+    const discountPercentage = document.getElementById("discountPercentage");
+    const rating = document.getElementById("rating");
+    let isValid = true;
+
+    // Reset all error messages and styles
+    color.classList.remove("border-red-500");
+    color.classList.add("border-gray-600");
+    document.getElementById("colorError").classList.add("hidden");
+
+    // Validate Color
+    if (!color.value.trim()) {
+      // If color field is empty
+      color.classList.add("border-red-500");
+      color.classList.remove("border-gray-600");
+      document.getElementById("colorError").classList.remove("hidden");
+      isValid = false;
+    } else if (!isNaN(color.value.trim())) { // If the color is a number (not allowed)
+      color.classList.add("border-red-500");
+      color.classList.remove("border-gray-600");
+      document.getElementById("colorError").classList.remove("hidden");
+      isValid = false;
+    }
+
+    // Validate Price (ensure it's a positive number)
+    if (!price.value.trim() || parseFloat(price.value) <= 0) {
+      price.classList.add("border-red-500");
+      price.classList.remove("border-gray-600");
+      isValid = false;
+    } else {
+      price.classList.remove("border-red-500");
+      price.classList.add("border-gray-600");
+    }
+
+    // Validate Discount Price (optional, ensure it's a valid number)
+    if (discountPrice.value.trim() && parseFloat(discountPrice.value) < 0) {
+      discountPrice.classList.add("border-red-500");
+      discountPrice.classList.remove("border-gray-600");
+      isValid = false;
+    } else {
+      discountPrice.classList.remove("border-red-500");
+      discountPrice.classList.add("border-gray-600");
+    }
+
+    // Validate Discount Percentage (optional, between 0 and 100)
+    if (discountPercentage.value.trim() && (parseFloat(discountPercentage.value) < 0 || parseFloat(discountPercentage.value) > 100)) {
+      discountPercentage.classList.add("border-red-500");
+      discountPercentage.classList.remove("border-gray-600");
+      isValid = false;
+    } else {
+      discountPercentage.classList.remove("border-red-500");
+      discountPercentage.classList.add("border-gray-600");
+    }
+
+    // Validate Rating (optional, between 0 and 5)
+    if (rating.value.trim() && (parseFloat(rating.value) < 0 || parseFloat(rating.value) > 5)) {
+      rating.classList.add("border-red-500");
+      rating.classList.remove("border-gray-600");
+      isValid = false;
+    } else {
+      rating.classList.remove("border-red-500");
+      rating.classList.add("border-gray-600");
+    }
+
+    // If any validation fails, prevent form submission
+    if (!isValid) {
+      e.preventDefault(); // Prevent the form from submitting
+      alert("Please fill out the form correctly.");
+    }
+  });
+</script>
+
+
   </body>
 </html>

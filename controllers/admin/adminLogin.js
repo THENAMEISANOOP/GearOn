@@ -1,7 +1,7 @@
 const userAuthenticated = require("../middleware/adminauthmildware");
 const User = require("../models/userModel");
 
-///////////////////Admin Login-------------------
+//Admin Login-
 exports.getLogin = (req, res) => {
   if (req.session.admin) {
     res.setHeader(

@@ -26,7 +26,7 @@ router.get("/user/profile", User.getProfilePage);
 router.post("/user/logout", User.logoutPOST);
 
 
-router.get("/home", User.home);
+router.get("/", User.home);
 router.get("/shopall", User.shopAll);
 router.get("/product/:id", User.viewProduct);
 

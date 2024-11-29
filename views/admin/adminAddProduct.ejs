@@ -140,6 +140,60 @@
       let selectedFile;
 
 
+
+// validation 
+
+document.getElementById("productForm").addEventListener("input", function () {
+  const productName = document.getElementById("productName");
+  const brand = document.getElementById("brand");
+
+  // Validation for Product Name
+  if (!productName.value.trim()) {
+    productName.classList.add("border-red-500");
+    productName.classList.remove("border-gray-600");
+  } else {
+    productName.classList.remove("border-red-500");
+    productName.classList.add("border-gray-600");
+  }
+
+  // Validation for Brand
+  if (!brand.value.trim()) {
+    brand.classList.add("border-red-500");
+    brand.classList.remove("border-gray-600");
+  } else {
+    brand.classList.remove("border-red-500");
+    brand.classList.add("border-gray-600");
+  }
+  
+  // Check for spaces at the beginning of input and prevent it
+  if (productName.value.startsWith(" ")) {
+    productName.value = productName.value.trimStart(); // Remove leading space
+  }
+
+  if (brand.value.startsWith(" ")) {
+    brand.value = brand.value.trimStart(); // Remove leading space
+  }
+});
+
+document.getElementById("productForm").addEventListener("submit", function (e) {
+  const productName = document.getElementById("productName");
+  const brand = document.getElementById("brand");
+
+  // Check if fields are empty after trim and show validation
+  if (!productName.value.trim() || !brand.value.trim()) {
+    e.preventDefault();
+    // Optionally focus on the first invalid field
+    if (!productName.value.trim()) {
+      productName.focus();
+    } else if (!brand.value.trim()) {
+      brand.focus();
+    }
+  }
+});
+
+
+
+
       function addImage() {
         const imageFileInput = document.getElementById("imageFile");
         const fileError = document.getElementById("fileError");

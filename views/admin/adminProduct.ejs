@@ -127,7 +127,7 @@
           </div>
         </div>
       </header>
-      <div id="results" class="p-4 text-gray-200"></div>
+      
       
       <!-- Customer Table -->
       <div class="bg-zinc-800 rounded-lg p-6">
@@ -278,6 +278,9 @@
               class="px-4 py-2 bg-gray-700 rounded-lg">Next</a>
             <% } %>
           </div>
+          
+
+          
         </div>
       </main>
       <script>
@@ -474,26 +477,31 @@
     console.error('Error fetching search results:', error);
   }
 }
+
 // search
 
-function displayResults(results) {
-  const resultsContainer = document.getElementById('results');
-  resultsContainer.innerHTML = '';
+function handleSearch() {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const resultsContainer = document.getElementById('results');
+    const products = document.querySelectorAll('tbody tr');
 
-  if (results.length === 0) {
-    resultsContainer.innerHTML = '<p>No results found</p>';
-    return;
-  }
+    let found = false;
+    products.forEach(product => {
+        const productName = product.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        if (productName.includes(searchInput)) {
+            product.style.display = ''; // Show matching rows
+            found = true;
+        } else {
+            product.style.display = 'none'; // Hide non-matching rows
+        }
+    });
 
-  const list = document.createElement('ul');
-  results.forEach(item => {
-    const listItem = document.createElement('li');
-    listItem.textContent = item.name; // Adjust to your API response structure
-    list.appendChild(listItem);
-  });
-  resultsContainer.appendChild(list);
+    if (!found) {
+        resultsContainer.innerHTML = 'No results found';
+    } else {
+        resultsContainer.innerHTML = '';
+    }
 }
-
 
 
   </script>

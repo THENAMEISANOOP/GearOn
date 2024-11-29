@@ -9,7 +9,7 @@ exports.loginGET = (req, res) => {
   // Check if the user is already logged in (session exists)
   if (req.session.user) {
     // Redirect to the home page if logged in
-    return res.redirect("/home");
+    return res.redirect("/");
   }
   // Render the login page if the user is not logged in
   res.render("user/userLogin");
@@ -37,7 +37,7 @@ exports.loginPOST = async (req, res) => {
     req.session.user = user;
 
     // Redirect to the home page after successful login
-    res.redirect("/home");
+    res.redirect("/");
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Server error" });
@@ -176,7 +176,7 @@ exports.logoutPOST = (req, res) => {
         console.error("Error during logout:", err);
         return res.status(500).send("Failed to logout. Please try again.");
       }
-      res.redirect("/home");
+      res.redirect("/");
     });
   } catch (error) {
     console.error("Error in logoutPOST:", error);
