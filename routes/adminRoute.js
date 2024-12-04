@@ -3,7 +3,7 @@ const router = express.Router();
 const adminController = require("../controllers/adminController");
 const uploadMiddleware = require("../middleware/uploadMiddleware");
 const checkSession = require("../middleware/checkSession");
-const adminAuth = require("../middleware/adminauthmildware");
+const adminAuthenticated = require("../middleware/adminauthmildware");
 
 // router.use((req, res, next) => {
 //     req.session.admin = true;
@@ -14,9 +14,9 @@ const adminAuth = require("../middleware/adminauthmildware");
 router.get("/login", checkSession, adminController.getLogin);
 router.post("/login", adminController.postLogin);
 
-router.post("/logout", adminAuth, adminController.logout);
+router.post("/logout", adminAuthenticated, adminController.logout);
 // Admin dashboard
-router.get("/dashboard", adminAuth, adminController.getDashboard);
+router.get("/dashboard", adminAuthenticated, adminController.getDashboard);
 // Admin  Customers
 router.get("/customers", adminController.getCustomers);
 router.post("/customers/unblock/:id", adminController.unblockCustomer);
@@ -39,6 +39,12 @@ router.post("/products/add", uploadMiddleware, adminProduct.postAddProduct);
 router.get("/products/:id/details", adminProduct.getProductDetails);
 router.post("/products/update/:id", adminProduct.updateProductDetails);
 
+// Admin edit Photo
+router.get("/products/:id/image", adminAuthenticated, adminProduct.getEditProductImage);
+router.post("/products/:id/image", uploadMiddleware, adminProduct.postEditProductImage);
+
+
+
 router.post("/products/delete/:id", adminProduct.deleteProduct);
 
 router.get("/products/add/variant", adminProduct.getAddvariant);
@@ -48,6 +54,15 @@ router.post("/products/add/variant", adminProduct.postAddvariant);
 
 // routes.js
 router.get('/admin/customers/search', adminController.searchCustomers);
+
+
+
+// Admin Orders
+const adminOrders = require("../controllers/admin/adminOrdersController");
+
+router.get("/orders", adminOrders.getAdminOrders);
+router.get("/orders/details/:id", adminOrders.getAdminOrdersDetails);
+router.post("/orders/update-status", adminOrders.updateOrderStatus);
 
 
 

@@ -285,6 +285,34 @@ exports.shopAll = async (req, res) => {
   }
 };
 
+
+
+
+// Function to handle profile update (POST request)
+exports.updateProfile = async (req, res) => {
+  const { fullName, email, mobile } = req.body;
+
+  // Simple validation (you can enhance this)
+  if (!fullName || !email || !mobile) {
+      return res.status(400).send("All fields are required.");
+  }
+
+  try {
+      // Find the user and update their profile
+      const updatedUser = await User.findByIdAndUpdate(
+          req.user.id,
+          { fullName, email, mobile },
+          { new: true } // Return the updated user object
+      );
+
+      // Redirect to the profile page after update
+      res.redirect("/user/profile");
+  } catch (error) {
+      console.error(error);
+      res.status(500).send("Failed to update profile");
+  }
+};
+
 exports.viewProduct = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -305,15 +333,18 @@ exports.viewProduct = async (req, res) => {
       },
       {
         $project: {
+          _id: 1,
           productName: 1,
           imageUrl: 1,
-          model: 1,
+          gender: 1,
           brand: 1,
+          categoriesId : 1,
           "variants.price": 1,
           "variants.discountPrice": 1,
           "variants.discountPercentage": 1,
           "variants.rating": 1,
           "variants.color": 1,
+          "variants.stock": 1,
         },
       },
     ]);
@@ -324,23 +355,175 @@ exports.viewProduct = async (req, res) => {
 
     // Format product data
     const formattedProduct = {
+      _id: product[0]._id, // Ensure _id is accessible
       productName: product[0].productName,
       imageUrl: product[0].imageUrl,
-      model: product[0].model,
+      gender: product[0].gender,
       brand: product[0].brand,
+      categoriesId: product[0].categoriesId,
       variants: product[0].variants.map((variant) => ({
         price: variant.price || "N/A",
         discountPrice: variant.discountPrice || "N/A",
         discountPercentage: variant.discountPercentage || "N/A",
         rating: variant.rating || "No rating",
         color: variant.color || "Unknown",
+        stock: variant.stock,
       })),
     };
+////////////////////////////
+ const products = await Product.aggregate([
+  {
+    $lookup: {
+      from: "variants",
+      localField: "_id",
+      foreignField: "productId",
+      as: "variants",
+    },
+  },
+  {
+    $unwind: {
+      path: "$variants",
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $match: {
+      categoriesId: formattedProduct.categoriesId, 
+    },
+  },
+  {
+    $project: {
+      _id: 1,
+      brand: 1,
+      productName: 1,
+      imageUrl: 1,
+      "variants.color": 1,
+      "variants.price": 1,
+      "variants.rating": 1,
+      "variants.discountPrice": 1,
+      "variants.discountPercentage": 1,
+      "variants.stock": 1,
+    },
+  },
+]);
 
-    res.render("user/viewProduct", { product: formattedProduct });
+const formattedRelatedProducts = products.map((product) => ({
+  _id: product._id,
+  brand: product.brand,
+  productName: product.productName,
+  imageUrl:
+    Array.isArray(product.imageUrl) && product.imageUrl.length > 0
+      ? product.imageUrl[0]
+      : "/images/default-product.jpg",
+  color: product.variants?.color,
+  price: product.variants?.price || null,
+  rating: product.variants?.rating || null,
+  discountPrice: product.variants?.discountPrice || null,
+  discountPercentage: product.variants?.discountPercentage || null,
+  stock: product.variants?.stock,
+}));
+
+//////////////
+    res.render("user/viewProduct", {
+      product: formattedProduct,
+      relatedProducts: formattedRelatedProducts,
+    });
   } catch (err) {
     console.error("Error fetching product:", err.message);
     res.status(500).send("Server Error");
   }
 };
 
+exports.getVariantDetails = async (req, res) => {
+  try {
+    // console.log(2222222);
+    const { productId, color } = req.query;
+
+    // Validate inputs
+    if (!productId || !color) {
+      return res.status(400).json({ message: "Missing productId or color." });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: "Invalid Product ID." });
+    }
+
+    // Fetch the variant directly from the Variant collection
+    const variant = await Variant.findOne({
+      productId: productId, // Match the productId
+      color: { $regex: new RegExp(`^${color}$`, "i") }, // Case-insensitive color match
+    });
+
+    if (!variant) {
+      return res.status(404).json({ message: "Variant not found." });
+    }
+
+    // console.log(variant);
+    res.json(variant);
+  } catch (error) {
+    console.error("Error fetching variant details:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};
+
+// search
+
+exports.search = async (req, res) => {
+  try {
+    const { query } = req.query; // Get the search query from the URL query string
+
+    // Ensure the query exists
+    if (!query) {
+      return res.status(400).send("Query parameter is required.");
+    }
+
+    // Perform an aggregation with $lookup
+    const products = await Product.aggregate([
+      {
+        $lookup: {
+          from: "variants", // Name of the collection to join
+          localField: "_id", // Field from the 'Product' collection
+          foreignField: "productId", // Field from the 'variants' collection
+          as: "variants", // Output array field
+        },
+      },
+      {
+        $unwind: {
+          path: "$variants", // Unwind the joined variants
+          preserveNullAndEmptyArrays: true, // Keep products without variants
+        },
+      },
+      {
+        $match: {
+          $or: [
+            { productName: { $regex: query, $options: "i" } },
+            { brand: { $regex: query, $options: "i" } },
+            { model: { $regex: query, $options: "i" } },
+          ],
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          brand: 1,
+          productName: 1,
+          imageUrl: 1,
+          "variants.color": 1,
+          "variants.price": 1,
+          "variants.rating": 1,
+          "variants.discountPrice": 1,
+          "variants.discountPercentage": 1,
+          "variants.stock": 1,
+        },
+      },
+    ]);
+
+
+
+    // Render the search results in the 'user/searchResults' view
+    res.render("user/searchResults", { products, query }); // Correct the path based on your folder structure
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred while searching for products.");
+  }
+};

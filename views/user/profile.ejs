@@ -1,12 +1,106 @@
-<div class="user-profile">
-<h1>Welcome, <%= user.fullName.split(" ")[0] %></h1>
+<!DOCTYPE html>
+<html lang="en" class="bg-black text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - GearOn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="border-b border-gray-800">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <nav class="flex items-center space-x-6">
+                    <a href="#" class="text-lg font-bold flex items-center">
+                        <img src="/images/gearon_logo.png" alt="GearOn Logo" class="h-16 mr-2"></a>
+                    <a href="/" class="hidden md:inline hover:ring-2 hover:ring-yellow-500">Home</a>
+                    <a href="/shopall" class="hidden md:inline hover:ring-2 hover:ring-yellow-500">Shop</a>
+                    <a href="#" class="hidden md:inline hover:ring-2 hover:ring-yellow-500">Contact Us</a>
+                    <a href="#" class="hidden md:inline hover:ring-2 hover:ring-yellow-500">About Us</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <button class="hover:ring-2 hover:ring-yellow-500">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                    <!-- User Greeting or Login Option (with added margin-left) -->
+                    <div class="hidden lg:flex items-center space-x-4 ml-8">
+                        <% if (user) { %>
+                            <a href="/user/profile" class="flex items-center space-x-1 text-sm hover:text-yellow-500">
+                                <i class="fa-regular fa-user text-base"></i>
+                                <span>Hello, <%= user.fullName.split(" ")[0] %></span>
+                            </a>
+                        <% } else { %>
+                            <a href="/user/login" class="flex items-center space-x-1 text-sm hover:text-yellow-500">
+                                <i class="fa-regular fa-user text-base"></i>
+                                <span>Login</span>
+                            </a>
+                        <% } %>
+                    </div>
+                    <button class="hover:ring-2 hover:ring-yellow-500">
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
 
-  <form action="/user/logout" method="POST" class="mt-4">
-    <button
-      type="submit"
-      class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-    >
-      Logout
-    </button>
-  </form>
-</div>
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Sidebar -->
+            <aside class="md:col-span-1 space-y-4">
+                <h2 class="text-xl font-bold mb-6">My Account</h2>
+                <nav class="space-y-2">
+                    <a href="/" class="flex items-center space-x-2 p-2 bg-gray-800 rounded-lg hover:ring-2 hover:ring-yellow-500">
+                        <i class="fas fa-user"></i>
+                        <span>Personal Information</span>
+                    </a>
+                    <a href="/user/address" class="flex items-center space-x-2   p-2 hover:ring-2 hover:ring-yellow-500 rounded-lg">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Address</span>
+                    </a>
+                    <a href="/user/orders" class="flex items-center space-x-2 p-2 hover:ring-2 hover:ring-yellow-500 rounded-lg">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>My Orders</span>
+                    </a>
+                    <a href="/user/changePassword" class="flex items-center space-x-2 p-2 hover:ring-2 hover:ring-yellow-500 rounded-lg">
+                        <i class="fas fa-lock"></i>
+                        <span>Change Password</span>
+                    </a>
+                    <form action="/user/logout" method="POST">
+                        <button type="submit" class="w-full bg-red-600 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:ring-2 hover:ring-yellow-500">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="md:col-span-3">
+                <div class="bg-gray-900 p-6 rounded-lg">
+                    <h1 class="text-2xl font-bold mb-6">Personal Information</h1>
+                    <form action="/user/update" method="POST" class="space-y-6">
+                        <div class="space-y-2">
+                            <label for="fullName" class="block">Full Name</label>
+                            <input id="fullName" type="text" name="fullName" value="<%= user.fullName %>" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 hover:ring-2 hover:ring-yellow-500" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="email" class="block">Email</label>
+                            <input id="email" type="email" name="email" value="<%= user.email %>" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 hover:ring-2 hover:ring-yellow-500" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="mobile" class="block">Mobile No.</label>
+                            <input id="mobile" type="tel" name="mobile" value="<%= user.mobile %>" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 hover:ring-2 hover:ring-yellow-500" required>
+                        </div>
+                        <button type="submit" class="w-full bg-white text-black p-2 rounded-lg hover:ring-2 hover:ring-yellow-500">
+                            Update
+                        </button>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

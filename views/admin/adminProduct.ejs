@@ -13,6 +13,9 @@
       crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
+      <!-- SweetAlert 2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
     /* Scrollbar styles */
     ::-webkit-scrollbar {
@@ -39,71 +42,9 @@
   </head>
 
   <body class="bg-black text-white min-h-screen">
-    <!-- Sidebar -->
-    <aside class="fixed top-0 left-0 w-64 h-full bg-blue-900 p-5 shadow-lg">
-      <!-- Logo -->
-      <div class="flex items-center justify-center mb-8">
-        <img src="/images/gearon_logo.png" alt="GearOn Logo" class="h-full">
-      </div>
-      <!-- Navigation Links -->
-      <nav class="space-y-6 text-sm">
-        <a href="/admin/dashboard"
-          class="flex items-center space-x-3 text-gray-400 hover:text-white">
-          <span class="material-icons">dashboard</span>
-          <span>Dashboard</span>
-        </a>
-        <a href="/admin/products"
-          class="flex items-center space-x-3 text-gray-400 hover:text-white">
-          <span class="material-icons">inventory_2</span>
-          <span>Products</span>
-        </a>
-        <a href="/admin/customers"
-          class="flex items-center space-x-3 text-gray-400 hover:text-white">
-          <span class="material-icons">people</span>
-          <span>Customers</span>
-        </a>
-        <a href="#"
-          class="flex items-center space-x-3 text-gray-400 hover:text-white">
-          <span class="material-icons">shopping_cart</span>
-          <span>Orders</span>
-        </a>
-        <a href="#"
-          class="flex items-center space-x-3 text-gray-400 hover:text-white">
-          <span class="material-icons">local_offer</span>
-          <span>Coupons</span>
-        </a>
-        <a href="/admin/category"
-          class="flex items-center space-x-3 text-gray-400 hover:text-white">
-          <span class="material-icons">category</span>
-          <span>Category</span>
-        </a>
-        <a href="#"
-          class="flex items-center space-x-3 text-gray-400 hover:text-white">
-          <span class="material-icons">star</span>
-          <span>Offers</span>
-        </a>
-        <a href="#"
-          class="flex items-center space-x-3 text-gray-400 hover:text-white">
-          <span class="material-icons">photo</span>
-          <span>Banner</span>
-        </a>
-        <a href="#"
-          class="flex items-center space-x-3 text-gray-400 hover:text-white">
-          <span class="material-icons">assessment</span>
-          <span>Sales Report</span>
-        </a>
-        <a href="#"
-          class="flex items-center space-x-3 text-gray-400 hover:text-white">
-          <form action="/admin/logout" method="post">
-            <button type="submit"
-              class="flex items-center space-x-2 px-4 py-2 bg-red-700 text-white font-semibold rounded-lg hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-400">
-              <span class="material-icons">logout</span>
-              <span>Logout</span>
-            </button>
-          </form>
-        </a>
-      </nav>
-    </aside>
+
+  <!-- Sidebar -->
+   <%- include("partials/sidebar")  %>
 
     <!--------------------------------Main Category----------------------------->
 
@@ -113,22 +54,15 @@
       <header class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-semibold text-gray-200">Products</h1>
         <div class="flex items-center space-x-4">
-          <div class="relative">
-            <input 
-              type="text" 
-              id="searchInput" 
-              placeholder="Search"
-              class="bg-gray-800 text-white p-2 rounded pl-10 focus:outline-none"
-              oninput="handleSearch()"
-            >
+          <!-- <div class="relative">
+            <input type="text" placeholder="Search"
+              class="bg-gray-800 text-white p-2 rounded pl-10 focus:outline-none">
             <span class="absolute left-3 top-2 text-gray-400">
               <i class="material-icons">search</i>
             </span>
-          </div>
+          </div> -->
         </div>
       </header>
-      
-      
       <!-- Customer Table -->
       <div class="bg-zinc-800 rounded-lg p-6">
         <table class="min-w-full text-left text-gray-400">
@@ -154,8 +88,8 @@
                 <%= product.productName %>
               </td>
               <td class="py-3 px-4 text-white">
-                <%= product.categoriesId ? product.categoriesId.categoriesName : 'No Category' %>
-            </td>
+                <%= product.categoriesId.categoriesName %>
+              </td>
               <td class="py-3 px-4 text-white">
                 <%= product.brand %>
               </td>
@@ -222,12 +156,9 @@
                       <label for="model">Model:</label>
                       <select id="model" name="model"
                         class="bg-zinc-900 w-full px-4 py-2 border rounded-lg">
-                        <option value="RC390" class="bg-zinc-900 text-white">RC390</option>
-                        <option value="RC200" class="bg-zinc-900 text-white">RC200</option>
-                        <option value="RC125" class="bg-zinc-900 text-white">RC125</option>
-                        <option value="DUKE390" class="bg-zinc-900 text-white">DUKE390</option>
-                        <option value="DUKE200" class="bg-zinc-900 text-white">DUKE200</option>
-                        <option value="DUKE125" class="bg-zinc-900 text-white">DUKE125</option>
+                        <option value="RC125">RC125</option>
+                        <option value="RC200">RC200</option>
+                        <option value="RC390">RC390</option>
                       </select>
                     </div>
 
@@ -245,6 +176,7 @@
                       <div id="productPhotos" class="flex gap-2 mb-4">
                         <!-- Photos will be dynamically loaded here -->
                       </div>
+
                     </div>
                     <!-- Variants -->
                     <div id="variantsContainer" class=" mt-2 ">
@@ -278,12 +210,10 @@
               class="px-4 py-2 bg-gray-700 rounded-lg">Next</a>
             <% } %>
           </div>
-          
-
-          
         </div>
       </main>
       <script>
+
 
 
     async function openEditModal(productId) {
@@ -316,13 +246,37 @@
                   </option>
                 `)
             .join("")}
+            
             </select>
           `;
 
 
-        productPhotos.innerHTML = data.product.photos
-          .map(photo => `<img src="${photo}" class="w-16 h-16 object-cover rounded-md">`)
-          .join("");
+// Populate product photos
+          const productPhotos = document.getElementById('productPhotos');
+          productPhotos.innerHTML = data.product.photos
+            .map(photo => `<img src="${photo}" class="w-16 h-16 object-cover rounded-md">`)
+            .join("");
+
+          // Add Edit Photos button
+          productPhotos.innerHTML += `
+            <button
+              id="updatePhotosButton"
+              type="button"
+              class="bg-violet-700 text-white px-4 py-2 rounded-lg hover:bg-violet-500 mt-2"
+            >
+              Update Photos
+            </button>
+          `;
+
+          // Add event listener to the button
+          document.getElementById('updatePhotosButton').addEventListener('click', () => {
+            document.getElementById('editProductForm').action = `/admin/products/${productId}/image`;
+            document.getElementById('editProductForm').submit();
+          });
+
+
+
+
 
         variantsContainer.innerHTML = data.variants
           .map(variant => `
@@ -342,6 +296,11 @@
             <input type="number" name="price" value="${variant.price}" class="mt-1 block w-full px-4 py-2 border border-gray-700 bg-zinc-900 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Price">
           </div>
 
+
+          <div>
+            <label class="block text-gray-400">stock</label>
+            <input type="number" name="stock" value="${variant.stock}" class="mt-1 block w-full px-4 py-2 border border-gray-700 bg-zinc-900 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="stock">
+          </div>
           <div>
             <label class="block text-gray-400">Discount Price</label>
             <input type="number" name="discountPrice" value="${variant.discountPrice}" class="mt-1 block w-full px-4 py-2 border border-gray-700 bg-zinc-900 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Discount Price">
@@ -359,9 +318,9 @@
 
         </div>
 
-        <button type="button" onclick="removeVariant(this)" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+        <!-- <button type="button" onclick="removeVariant(this)" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
           Remove
-        </button>
+        </button> -->
       </div>
 
 
@@ -412,7 +371,8 @@
           price: item.querySelector("input[name='price']").value,
           discountPrice: item.querySelector("input[name='discountPrice']").value,
           discountPercentage: item.querySelector("input[name='discountPercentage']").value,
-          rating: item.querySelector("input[name='rating']").value
+          rating: item.querySelector("input[name='rating']").value,
+          stock: item.querySelector("input[name='stock']").value,
         })),
       };
 
@@ -425,13 +385,27 @@
           body: JSON.stringify(payload),
         });
 
-        if (response.ok) {
-          alert("Product updated successfully!");
-          window.location.reload();
-        } else {
-          const errorData = await response.json();
-          alert(errorData.error || "Error updating product.");
-        }
+if (response.ok) {
+    // Success Alert
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: 'Product updated successfully!',
+      confirmButtonText: 'OK',
+    }).then(() => {
+      window.location.reload();
+    });
+  } else {
+    const errorData = await response.json();
+    // Error Alert
+    Swal.fire({
+      icon: 'error',
+      title: 'Error!',
+      text: errorData.error || 'Error updating product.',
+      confirmButtonText: 'Retry',
+    });
+  }
+
       } catch (error) {
         console.error("Error updating product:", error);
         alert("Failed to update product.");
@@ -454,29 +428,6 @@
     function addVariant(productId) {
       window.location.href = `/admin/products/add/variant?productId=${productId}`;
     }
-
-    async function handleSearch() {
-  const query = document.getElementById('searchInput').value;
-
-  // Check if the input is empty; clear results
-  if (!query.trim()) {
-    document.getElementById('results').innerHTML = '';
-    return;
-  }
-
-  try {
-    // Send a request to the server-side API for search
-    const response = await fetch(`/search?query=${encodeURIComponent(query)}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch results');
-    }
-
-    const results = await response.json();
-    displayResults(results);
-  } catch (error) {
-    console.error('Error fetching search results:', error);
-  }
-}
 
 // search
 

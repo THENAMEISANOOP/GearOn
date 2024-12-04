@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Search Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+
+  <body class="bg-gray-100">
+    <!-- Navbar -->
+    <%- include("partials/navBar") %>
+    <div class="mt-16"></div>
+
+    <!-- Page Content -->
+    <div class="py-12 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+          Search Results for "<%= query %>"
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <!-- Loop through the products array -->
+          <% if (products.length > 0) { %>
+            <% products.forEach(product => { %>
+              <div class="bg-white rounded-lg shadow-md p-4 flex flex-col">
+                <a href="/product/<%= product._id %>">
+                  <!-- Use default image if product.imageUrl is missing -->
+                  <img
+                    class="w-full h-auto rounded-lg mb-4"
+                    src="<%= product.imageUrl ? product.imageUrl[0] : '/images/default.jpg' %>"
+                    alt="<%= product.productName %>"
+                  />
+                </a>
+                <h3 class="text-lg font-semibold text-gray-800"><%= product.productName %></h3>
+                
+                <!-- Display price and discount price -->
+                <% if (product.variants) { %>
+                  <% const variant = product.variants; %>
+                  <div class="flex gap-2">
+                    <div class="text-xl font-bold text-gray-900">
+                      ₹<%= variant.discountPrice ? variant.discountPrice.toLocaleString() : 'N/A' %>
+                    </div>
+                    <% if (variant.price) { %>
+                      <div class="text-gray-500 line-through mt-1">
+                        ₹<%= variant.price.toLocaleString() %>
+                      </div>
+                    <% } %>
+                  </div>
+                <% } else { %>
+                  <div class="text-xl font-bold text-gray-900">
+                    Price Not Available
+                  </div>
+                <% } %>
+                
+                <div class="flex justify-between items-center mt-4">
+                  <div></div>
+                  <a href="#" class="hover:text-slate-500">
+                    <i class="fa-regular fa-heart"></i>
+                  </a>
+                </div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <p>No products found matching your search.</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <%- include("partials/footer") %>
+  </body>
+</html>

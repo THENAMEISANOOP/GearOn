@@ -54,22 +54,23 @@ app.use(navbarUsername);
 
 const userRoute = require("./routes/userRoute");
 app.use("/", userRoute);
-
+ 
 const adminRoute = require("./routes/adminRoute");
 app.use("/admin", adminRoute);
 
+ 
 
-
-app.use(express.json());
+app.use(express.json());   
 app.use(express.urlencoded({ extended: true }));
 
 // --------------Google Login---------------------------
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.session());  
 
-passport.use(
+
+passport.use( 
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
@@ -189,6 +190,6 @@ app.get('/search', (req, res) => {
 
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/user/login`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
 

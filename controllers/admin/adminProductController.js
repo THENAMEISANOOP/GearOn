@@ -1,4 +1,4 @@
-// const userAuthenticated = require("../middleware/adminauthmildware");
+const adminAuthenticated = require("../../middleware/adminauthmildware");
 require("dotenv").config();
 const Product = require("../../models/productSchema");
 const Variant = require("../../models/variantSchema");
@@ -141,6 +141,7 @@ exports.getProductDetails = async (req, res) => {
         rating: variant.rating,
         discountPrice: variant.discountPrice,
         discountPercentage: variant.discountPercentage,
+        stock: variant.stock,
       })),
       categories,
     });
@@ -151,11 +152,116 @@ exports.getProductDetails = async (req, res) => {
 };
 
 
+//---------------GET Update Product Image----------------------
+exports.getEditProductImage = [
+  adminAuthenticated,
+  async (req, res) =>{
+  try {
+    const productId = req.params.id;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      console.log("Product not found");
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+
+    console.log(product);
+    res.render("admin/adminEditImage",product)
+  } catch (error) {
+    console.error("Error fetching product details:", error);
+    res.status(500).json({ error: "Failed to fetch product details" });
+  }
+},
+]
+
+
+
+//---------------POST Update Product Image----------------------
+
+exports.postEditProductImage = async (req, res) => {
+  try {
+    console.log("Request Body:", req.body);
+    console.log("Request Files:", req.files);
+
+    const productId = req.params.id;
+    const { imageIndex } = req.body;
+
+    // Validate input with more detailed logging
+    if (!productId) {
+      console.error("Missing Product ID");
+      return res.status(400).json({ error: "Missing product ID" });
+    }
+
+    if (imageIndex === undefined) {
+      console.error("Missing Image Index");
+      return res.status(400).json({ error: "Missing image index" });
+    }
+
+    // Find the product
+    const product = await Product.findById(productId);
+    if (!product) {
+      console.error(`Product not found with ID: ${productId}`);
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Check uploaded image URLs
+    if (!req.body.imageUrls || req.body.imageUrls.length === 0) {
+      console.error("No image URLs provided");
+      return res.status(400).json({
+        error: "No new image uploaded",
+        details: {
+          bodyImageUrls: req.body.imageUrls,
+          filesExist: !!req.files,
+          fileCount: req.files ? req.files.length : 0,
+        },
+      });
+    }
+
+    const newImageUrl = req.body.imageUrls[0];
+    console.log("New Image URL:", newImageUrl);
+
+    // Update image URL logic remains the same
+    product.imageUrl[imageIndex] = newImageUrl;
+    const updatedProduct = await product.save();
+
+res.status(200).json({
+  message: "Product image updated successfully",
+  redirectUrl: "/admin/products", // Include redirect URL
+});
+
+  } catch (error) {
+    console.error("Comprehensive Error in Image Update:", {
+      message: error.message,
+      stack: error.stack,
+    });
+
+    res.status(500).json({
+      error: "Failed to update product image",
+      details: error.message,
+    });
+  }
+};
+
+// Utility function to extract public ID from Cloudinary URL
+function extractPublicIdFromUrl(url) {
+  // Extract the public ID from a Cloudinary URL
+  // Assumes Cloudinary URL format: https://res.cloudinary.com/[cloud_name]/image/upload/v[version]/[folder]/[public_id].[format]
+  const matches = url.match(/\/v\d+\/([^/]+)\.[^/.]+$/);
+  return matches ? matches[1] : null;
+}
+
+
+
+
+
+
+
 
 //---------------POST Update Product----------------------
 exports.updateProductDetails = async (req, res) => {
   try {
-    const { productName, brand, model, variants, categoriesId, imageUrls } =
+    const { productName, brand, model, variants, categoriesId, imageUrls ,stock} =
       req.body;  
 
     if (!productName || !brand || !model || !categoriesId) {
@@ -182,7 +288,8 @@ exports.updateProductDetails = async (req, res) => {
               price: variant.price,
               discountPrice: variant.discountPrice,
               discountPercentage: variant.discountPercentage,
-              rating: variant.rating
+              rating: variant.rating,
+              stock: variant.stock,
             },
             { new: true }
           );
@@ -252,6 +359,7 @@ exports.postAddvariant = async (req, res) => {
       discountPrice,
       discountPercentage,
       rating,
+      stock,
     } = req.body;
 
     // console.log(
@@ -274,6 +382,7 @@ exports.postAddvariant = async (req, res) => {
       discountPrice,
       discountPercentage,
       rating,
+      stock,
     });
 
     await newVariant.save();
