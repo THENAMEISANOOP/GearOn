@@ -4,6 +4,7 @@ const router = express.Router();
 const userAuthenticated = require("../middleware/userauthmildware");
 const userProfileController = require("../controllers/user/userProfileAddressController");
 const User = require("../controllers/userController");
+const ShopAllController = require("../controllers/user/ShopAllController");
 
 
 
@@ -83,6 +84,8 @@ router.post("/cart/add", cartController.addToCart);
 router.get("/shop/cart", userAuthenticated, cartController.getCart);
 router.delete("/cart/:id", cartController.deleteFromCart);
 router.put("/cart/:id", cartController.updateCartQuantity);
+// router.get("/variant/:cartItemId", cartController.getVariantStock);
+
 
 
 //-----------------CheckoutPage------------------------------------
@@ -95,8 +98,17 @@ router.post("/user/checkout", checkoutController.placeOrder);
 
 
 router.get("/", User.home);
-router.get("/shopall", User.shopAll);
+
 router.get("/product/:id", User.viewProduct);
+
+
+//--------------------SHOP ALL Page --------------------
+router.get("/shopall", ShopAllController.shopAll);
+// router.get("/products/filter", ShopAllController.filterProducts);
+router.get("/products/filter-options", ShopAllController.getFilterOptions);
+// router.get("/products/search", ShopAllController.searchProducts);
+
+router.get("/products/searchFilter", ShopAllController.searchAndFilterProducts);
 
 
 // search button

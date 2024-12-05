@@ -46,7 +46,7 @@
   </style>
   </head>
 
-  <body class="bg-gray-100">
+  <body class="bg-gray-900">
     <!------------ Navbar ---------->
     <%- include("partials/navBar") %>
     <div class="mt-16"></div>
@@ -81,17 +81,17 @@
 
           <!-- Right Section: Product Details -->
           <div class="w-full md:w-2/3 md:pl-12">
-            <h1 class="text-2xl font-bold text-gray-800">
+            <h1 class="text-2xl font-bold text-white">
               <%= product.productName %>
             </h1>
 
             <!-- Pricing -->
             <div class="flex items-center space-x-4 my-4">
-              <p class="text-lg text-gray-800 font-bold variant-price">
+              <p class="text-lg text-white font-bold variant-price">
                 ₹<%= product.variants[0]?.discountPrice.toLocaleString() ||
                 'N/A' %>
               </p>
-              <p class="text-gray-500 line-through variant-original-price">
+              <p class="text-gray-400 line-through variant-original-price">
                 ₹<%= product.variants[0]?.price.toLocaleString() || 'N/A' %>
               </p>
               <p class="text-green-600 font-semibold variant-discount">
@@ -103,10 +103,10 @@
             <!-- Rating -->
             <div class="text-yellow-500 flex items-center">
               <i class="fa fa-star"></i>
-              <p class="mr-2 text-gray-800 font-medium variant-rating">
+              <p class="mr-2 text-yellow-500 font-medium variant-rating">
                 <%= product.variants[0]?.rating || 'No rating' %>
               </p>
-              <span class="ml-1 text-gray-500">426 reviews</span>
+              <span class="ml-1 text-yellow-600">426 reviews</span>
             </div>
 
             <!-- Stock Status -->
@@ -129,17 +129,17 @@
 
             <!-- Product Details -->
             <div class="mt-6">
-              <h2 class="text-lg font-bold text-gray-800">Product Details</h2>
-              <ul class="text-gray-600 mt-4 space-y-2">
+              <h2 class="text-lg font-bold text-gray-200">Product Details</h2>
+              <ul class="text-gray-300 mt-4 space-y-2">
                 <li>
                   Model:
-                  <span class="font-semibold text-gray-800">
-                    <%= product.mod %>
+                  <span class="font-semibold text-gray-300">
+                    <%= product.model %>
                   </span>
                 </li>
                 <li>
                   Brand:
-                  <span class="font-semibold text-gray-800">
+                  <span class="font-semibold text-gray-300">
                     <%= product.brand %>
                   </span>
                 </li>
@@ -148,7 +148,7 @@
 
             <!-- Select Color -->
             <div class="mt-6">
-              <label for="color" class="block font-medium text-gray-700">Select
+              <label for="color" class="block font-medium text-gray-200">Select
                 Color</label>
               <select id="color"
                 class="mt-2 px-4 py-2 border rounded-lg shadow-sm">
@@ -193,7 +193,7 @@
                     Add To Cart
                   </button> -->
               <button id="addToCartButton"
-                class="px-6 py-3 bg-black text-white rounded-lg font-bold shadow-md hover:bg-gray-800">
+                class="px-6 py-3 bg-yellow-400 text-black rounded-lg font-bold shadow-md hover:bg-yellow-600">
                 Add To Cart
               </button>
               <% } %>
