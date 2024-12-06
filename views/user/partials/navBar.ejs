@@ -1,10 +1,13 @@
-<header class="bg-black text-white">
+<header class="bg-black text-white fixed top-0 left-0 w-full z-50">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between lg:justify-start">
         
-        <!-- Logo -->
-        <div class="flex items-center mr-8">
-            <img src="/images/gearon_logo.png" alt="Logo" class="h-16 w-full">
-        </div>
+       <!-- Logo -->
+<div class="flex items-center mr-8">
+    <a href="/">
+      <img src="/images/gearon_logo.png" alt="Logo" class="h-16 w-auto">
+    </a>
+  </div>
+  
 
         <!-- Search Box (Hidden on Small Screens) -->
         <div class="relative flex-grow mx-8 hidden lg:block">
@@ -13,7 +16,7 @@
                 type="text" 
                 name="query" 
                 placeholder="Search for products" 
-                class="pl-10 pr-4 py-2 rounded bg-gray-100 border-none text-white focus:ring-2 focus:ring-yellow-500 w-full" 
+                class="pl-10 pr-4 py-2 rounded bg-gray-100 border-none text-black focus:ring-2 focus:ring-yellow-500 w-full" 
                 required
               >
               <button type="submit" class="absolute right-2 top-2 text-yellow-500">
@@ -26,8 +29,7 @@
         <!-- Navigation Links (Hidden on Small Screens) -->
         <nav class="hidden lg:flex items-center space-x-8">
             <a href="/shopall" class="hover:text-yellow-500">Explore</a>
-            <a href="#" class="hover:text-yellow-500">Category</a>
-            <a href="/" class="hover:text-yellow-500">Home</a>
+            <a href="#" class="hover:text-yellow-500">About</a>
             <a href="#" class="hover:text-yellow-500">Contact Us</a>
         </nav>
 

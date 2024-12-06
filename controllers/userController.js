@@ -336,7 +336,7 @@ exports.viewProduct = async (req, res) => {
           _id: 1,
           productName: 1,
           imageUrl: 1,
-          gender: 1,
+          model: 1,
           brand: 1,
           categoriesId : 1,
           "variants.price": 1,
@@ -358,7 +358,7 @@ exports.viewProduct = async (req, res) => {
       _id: product[0]._id, // Ensure _id is accessible
       productName: product[0].productName,
       imageUrl: product[0].imageUrl,
-      gender: product[0].gender,
+      model: product[0].model,
       brand: product[0].brand,
       categoriesId: product[0].categoriesId,
       variants: product[0].variants.map((variant) => ({
