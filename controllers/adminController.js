@@ -149,7 +149,6 @@ exports.updateStatus = [
 const Category = require("../models/categoryModel");
 
 exports.getCategories = [
-  userAuthenticated,
   async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1;
@@ -161,7 +160,7 @@ exports.getCategories = [
       const totalPages = Math.ceil(totalCategories / limit);
 
       res.render("admin/adminCategory", {
-        message: req.query.message || undefined,  
+        message: req.query.message || undefined,
         categories,
         currentPage: page,
         totalPages,
@@ -174,43 +173,52 @@ exports.getCategories = [
 
 
 
-exports.addCategory = async (req, res) => {
-  try {
-    const categoryName = req.body.categoriesName.trim().toLowerCase();
-    const description = req.body.description.trim().toLowerCase();
+exports.addCategory = [
+  async (req, res) => {
+    try {
+      // const categoryName = req.body.categoriesName.trim().toLowerCase();
+      const lowerCategoryName = req.body.categoriesName.trim().toLowerCase();
+      const categoryName =
+        lowerCategoryName.charAt(0).toUpperCase() + lowerCategoryName.slice(1);
 
-     const existingCategory = await Category.findOne({
-      categoriesName: categoryName,
-    });
-    if (existingCategory) {
-      const categories = await Category.find();
-      const totalPages = Math.ceil((await Category.countDocuments()) / 10);
-      return res.render("admin/adminCategory", {
-        error: "Category already exists",
-        categories,
-        currentPage: 1,  
-        totalPages,
+
+      const existingCategory = await Category.findOne({
+        categoriesName: categoryName,
       });
+      if (existingCategory) {
+        const categories = await Category.find();
+        const totalPages = Math.ceil((await Category.countDocuments()) / 10);
+        return res.render("admin/adminCategory", {
+          error: "Category already exists",
+          categories,
+          currentPage: 1,
+          totalPages,
+        });
+      }
+
+      const newCategory = new Category({
+        categoriesName: categoryName,
+      });
+
+      await newCategory.save();
+      res.redirect("/admin/category");
+    } catch (err) {
+      res.status(500).send("Error adding category");
     }
-
-     const newCategory = new Category({
-      categoriesName: categoryName,
-      description:description
-    });
-
-    await newCategory.save();
-    res.redirect("/admin/category?message=success");
-  } catch (err) {
-    res.status(500).send("Error adding category");
   }
-};
+];
 
 
 exports.updateCategory = async (req, res) => {
   try {
+
+    const lowerCategoryName = req.body.categoriesName.trim().toLowerCase();
+    const categoriesName =
+      lowerCategoryName.charAt(0).toUpperCase() + lowerCategoryName.slice(1);
+
     await Category.findByIdAndUpdate(req.params.id, {
-      categoriesName: req.body.categoriesName,
-      
+      categoriesName,
+
     });
     res.redirect("/admin/category");
   } catch (err) {
@@ -227,23 +235,3 @@ exports.deleteCategory = async (req, res) => {
     res.status(500).send("Error deleting category");
   }
 };
-
-// AdminController.js
-exports.searchCustomers = async (req, res) => {
-  try {
-    const query = req.query.query.trim();
-    const customers = await User.find({
-      $or: [
-        { fullName: { $regex: query, $options: 'i' } },
-        { email: { $regex: query, $options: 'i' } }
-      ]
-    });
-    res.json(customers);
-  } catch (err) {
-    res.status(500).json({ message: "Error searching customers" });
-  }
-};
-
-
-
-

@@ -1,13 +1,11 @@
 <header class="bg-black text-white fixed top-0 left-0 w-full z-50">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between lg:justify-start">
         
-       <!-- Logo -->
-<div class="flex items-center mr-8">
-    <a href="/">
-      <img src="/images/gearon_logo.png" alt="Logo" class="h-16 w-auto">
-    </a>
-  </div>
-  
+        <!-- Logo -->
+        <div class="flex items-center mr-8">
+            <a href="/"><img src="/images/gearon_logo.png" alt="Logo" class="h-16 w-full"></a>
+        </div>
+        
 
         <!-- Search Box (Hidden on Small Screens) -->
         <div class="relative flex-grow mx-8 hidden lg:block">
@@ -28,15 +26,15 @@
 
         <!-- Navigation Links (Hidden on Small Screens) -->
         <nav class="hidden lg:flex items-center space-x-8">
-            <a href="/shopall" class="hover:text-yellow-500">Explore</a>
-            <a href="#" class="hover:text-yellow-500">About</a>
+            <a href="/shopall" class="hover:text-yellow-500">ShopAll</a>
+            <!-- <a href="#" class="hover:text-yellow-500">Category</a> -->
             <a href="#" class="hover:text-yellow-500">Contact Us</a>
         </nav>
 
         <!-- User Greeting or Login Option and Cart Icon -->
         <div class="hidden lg:flex items-center space-x-4 ml-8">
             <% if (user) { %>
-                <a href="/user/profile" class="flex items-center space-x-1 text-sm hover:text-yellow-500">
+                <a href="/user/profile" class="flex items-center space-x-1 text-sm  hover:text-yellow-500">
                     <i class="fa-regular fa-user text-base"></i>
                     <span>Hello, <%= user.fullName.split(" ")[0] %></span>
                 </a>

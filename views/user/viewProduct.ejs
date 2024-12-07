@@ -51,38 +51,43 @@
     <%- include("partials/navBar") %>
     <div class="mt-16"></div>
 
-     <!-- Breadcrumb -->
-     <div class="bg-gray-900 pt-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav class="text-sm font-medium text-white  " aria-label="Breadcrumb">
-          <ol class="flex items-center space-x-2">
-            <!-- Home Link -->
-            <li>
-              <a
-                href="/"
-                class="text-white hover:text-yellow-500 transition">Home</a>
-            </li>
-            <!-- Separator -->
-            <li>
-              <span class="text-white">/</span>
-            </li>
-            <li>
-              <a
-                href="/shopall"
-                class="text-white hover:text-yellow-500 transition"> ShopAll</a>
-            </li>
-             <!-- Separator -->
-             <li>
-              <span class="text-white">/</span>
-            </li>
-            <li>
-              <span class="text-white">Product</span>
-            </li>
-          </ol>
-        </nav>
-      </div>
-    </div>
 
+          <!-- Breadcrumb -->
+          <div class="bg-gray-900 pt-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <nav class="text-sm font-medium text-white  " aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2">
+                  <!-- Home Link -->
+                  <li>
+                    <a
+                      href="/"
+                      class="text-white hover:text-yellow-500 transition"
+                    >
+                      Home
+                    </a>
+                  </li>
+                  <!-- Separator -->
+                  <li>
+                    <span class="text-white">/</span>
+                  </li>
+                  <li>
+                    <a
+                      href="/shopall"
+                      class="text-white hover:text-yellow-500 transition"
+                    >
+                      shopAll
+                    </a>
+                  </li>
+                  <li>
+                    <span class="text-white">/</span>
+                  </li>
+                  <li>
+                    <span class="text-white">Product</span>
+                  </li>   
+                </ol>
+              </nav>
+            </div>
+          </div>
 
     <!-- Page Content -->
     <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -167,8 +172,7 @@
                 <li>
                   Model:
                   <span class="font-semibold text-gray-300">
-                    <%=product.model %>
-
+                    <%= product.model %>
                   </span>
                 </li>
                 <li>

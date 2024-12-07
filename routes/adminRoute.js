@@ -53,7 +53,7 @@ router.post("/products/add/variant", adminProduct.postAddvariant);
 // router.post("/products/delete/:id", adminProduct.deletevariant);
 
 // routes.js
-router.get('/admin/customers/search', adminController.searchCustomers);
+// router.get('/admin/customers/search', adminController.searchCustomers);
 
 
 

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Header</title>
+    
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuButton = document.getElementById('menu-button');
+
+            menuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');  // Toggle visibility
+            });
+        });
+    </script>
+</head>
+<body>
+    <header class="bg-gray-900 text-white">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between lg:justify-start">
+            
+            <!-- Logo -->
+            <div class="flex items-center mr-8">
+                <img src="/images/gearon_logo.png" alt="Logo" class="h-16 w-full">
+            </div>
+            <!-- Search Box (Hidden on Small Screens) -->
+            <div class="relative flex-grow mx-8 hidden lg:block">
+                <input type="text" placeholder="Search for products" class="pl-10 pr-4 py-2 rounded bg-gray-800 border-none text-white focus:ring-2 focus:ring-yellow-500 w-full">
+                <span class="absolute left-2 top-2">
+                    <i class="fa fa-search text-gray-400"></i>
+                </span>
+            </div>
+
+            <!-- Navigation Links (Hidden on Small Screens) -->
+            <nav class="hidden lg:flex items-center space-x-8">
+                <div class="relative group">
+                    <!-- <button class="text-white hover:text-yellow-500">Shop by Bike</button> -->
+                    <div class="absolute hidden group-hover:block bg-gray-800 text-white shadow-lg p-2 mt-1">
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-700">Bike 1</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-700">Bike 2</a>
+                    </div>
+                </div>
+                <a href="#" class="hover:text-yellow-500">Explore</a>
+                <a href="#" class="hover:text-yellow-500">Category</a>
+                <a href="#" class="hover:text-yellow-500">About</a>
+                <a href="#" class="hover:text-yellow-500">Contact Us</a>
+            </nav>
+
+            <!-- Icons (User and Cart) -->
+            <div class="flex items-center gap-4 ml-8">
+                <a href="/user/login"><i class="fa fa-user text-xl hover:text-yellow-500"></i></a>
+
+                <i class="fa fa-shopping-cart text-xl hover:text-yellow-500"></i>
+            </div>
+
+            <!-- Mobile Menu Icon -->
+            <button id="menu-button" class="lg:hidden text-white ml-4">
+                <i class="fa fa-bars text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu (Visible on Small Screens) -->
+        <div id="mobile-menu" class="lg:hidden bg-gray-800 text-white hidden space-y-2 px-4 py-2">
+           
+            <a href="#" class="block hover:bg-gray-700 py-2">Explore</a>
+            <a href="#" class="block hover:bg-gray-700 py-2">Category</a>
+            <a href="#" class="block hover:bg-gray-700 py-2">About</a>
+            <a href="#" class="block hover:bg-gray-700 py-2">Contact Us</a>
+        </div>
+
+        <!-- Mobile Search Box -->
+        <div class="lg:hidden relative mt-4 px-4">
+            <input type="text" placeholder="Search for products" class="pl-10 pr-4 py-2 rounded bg-gray-800 border-none text-white focus:ring-2 focus:ring-yellow-500 w-full">
+            <span class="absolute left-2 top-2">
+                <i class="fa fa-search text-gray-400"></i>
+            </span>
+        </div>
+    </header>
+</body>
+</html>

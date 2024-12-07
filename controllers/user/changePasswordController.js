@@ -20,7 +20,7 @@ exports.getChangePassword = async (req, res) => {
 
 exports.postChangePassword = async (req, res) => {
     try {
-        console.log(222222222);
+        
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const user = await User.findById(req.session.user._id);
         console.log(user);

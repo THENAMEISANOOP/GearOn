@@ -115,6 +115,14 @@ router.get("/products/searchFilter", ShopAllController.searchAndFilterProducts);
 
 router.get('/search', User.search);
 
+// model tosearch
 
+const bikeController = require("../controllers/user/bikeController");
+
+// Route to display bike models
+router.get("/bikeModels", bikeController.getBikeModelsPage);
+
+// Route to display products for a specific bike model
+router.get("/products", bikeController.modelfilterControl);
 
 module.exports = router;
