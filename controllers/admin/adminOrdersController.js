@@ -3,6 +3,7 @@ const adminAuthenticated = require("../../middleware/adminauthmildware");
 const Order = require("../../models/orderModel");
 const User = require("../../models/userModel");
 const Variant = require("../../models/variantSchema");
+const Wallet = require("../../models/walletModel");
 
 
 exports.getAdminOrders = [
@@ -63,6 +64,7 @@ exports.getAdminOrdersDetails = [
         _id: order._id,
         userName: order.userName,
         orderDate: order.createdAt,
+        couponValue: order.couponValue,
         totalPrice: order.totalPrice,
         paymentMethod: order.paymentMethod,
         shippingAddress: order.shippingAddress,
@@ -118,3 +120,81 @@ exports.updateOrderStatus = [
     }
   },
 ];
+
+exports.handleReturnRequest = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.body;
+    const action = req.url.includes("approve") ? "approve" : "reject";
+
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found." });
+
+    const orderItem = order.orderItems.find(
+      (item) => item._id.toString() === itemId
+    );
+    if (!orderItem)
+      return res.status(404).json({ message: "Order item not found." });
+
+    if (orderItem.orderStatus !== "Return-Requested") {
+      return res.status(400).json({ message: "Invalid return request state." });
+    }
+
+    if (action === "approve") {
+      orderItem.orderStatus = "Returned";
+
+      // Check if wallet exists, create if not
+      let wallet = await Wallet.findOne({ userId: order.userId });
+      if (!wallet) {
+        wallet = new Wallet({
+          userId: order.userId,
+          balance_amount: 0,
+          transactions: [],
+        });
+      }
+
+      // Refund amount
+      const refundAmount = orderItem.itemTotalPrice;
+
+      // Update wallet balance and add a transaction
+      wallet.balance_amount += refundAmount;
+      wallet.transactions.push({
+        transactionType: "CREDIT",
+        amount: refundAmount,
+        transactionDate: new Date(),
+      });
+
+      await wallet.save();
+
+      // Increase product variant quantity
+      const variant = await Variant.findById(orderItem.variant.variantId);
+      if (!variant) {
+        return res.status(404).json({ error: "Associated variant not found" });
+      }
+      variant.stock += orderItem.quantity;
+      await variant.save();
+
+      // Success response for approval
+      await order.save();
+      return res.status(200).json({
+        message: "Return request approved and refund processed successfully.",
+        orderStatus: orderItem.orderStatus,
+        refundAmount,
+      });
+    } else {
+      orderItem.orderStatus = "Return-Cancelled"; // Revert to previous status
+      orderItem.returnReason = null; // Clear the return reason
+
+      // Success response for rejection
+      await order.save();
+      return res.status(200).json({
+        message: "Return request rejected successfully.",
+        orderStatus: orderItem.orderStatus,
+      });
+    }
+  } catch (error) {
+    console.error("Error handling return request:", error);
+    res.status(500).json({ message: "Failed to process return request." });
+  }
+};
+
+

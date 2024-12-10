@@ -1,8 +1,6 @@
 const User = require("../../models/userModel");
 const bcrypt = require("bcrypt");
 
-
-
 // Render Change Password Page
 exports.getChangePassword = async (req, res) => {
     try {
@@ -17,30 +15,36 @@ exports.getChangePassword = async (req, res) => {
     }
 };
 
-
 exports.postChangePassword = async (req, res) => {
     try {
-        
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const user = await User.findById(req.session.user._id);
-        console.log(user);
-
 
         if (!user) {
             console.error("No user found.");
             return res.status(401).redirect("/login");
         }
 
-
+        // Check if the current password is correct
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
-            return res
-                .status(401)
-                .json({ message: "Current password is incorrect." });
+            return res.status(401).json({ message: "Current password is incorrect." });
         }
 
-        // Update password
-        user.password = newPassword;
+        // Check if the new password matches the current password
+        const isNewPasswordSame = await bcrypt.compare(newPassword, user.password);
+        if (isNewPasswordSame) {
+            return res.status(400).json({ message: "New password cannot be the same as the current password." });
+        }
+
+        // Check if new password and confirm password match
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ message: "New password and confirm password do not match." });
+        }
+
+        // Hash the new password and save it
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
         await user.save();
 
         // Send success response
@@ -49,8 +53,6 @@ exports.postChangePassword = async (req, res) => {
         console.error("Error changing password:", error);
 
         // Send error response
-        return res
-            .status(500)
-            .json({ message: "An error occurred while changing the password." });
+        return res.status(500).json({ message: "An error occurred while changing the password." });
     }
 };

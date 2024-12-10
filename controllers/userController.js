@@ -1,20 +1,15 @@
-const User = require("../models/userModel"); 
+const User = require("../models/userModel");
+const Offer = require("../models/offerModel")
 const bcrypt = require("bcryptjs");
 const userAuthenticated = require("../middleware/userauthmildware");
 
-
-
-// userController.js
-exports.loginGET = (req, res) => { 
-  // Check if the user is already logged in (session exists)
+// -------------User Login Page--------------------
+exports.loginGET = (req, res) => {
   if (req.session.user) {
-    // Redirect to the home page if logged in
-    return res.redirect("/");
+    return res.redirect("/user/profile");
   }
-  // Render the login page if the user is not logged in
   res.render("user/userLogin");
 };
-
 
 exports.loginPOST = async (req, res) => {
   try {
@@ -22,31 +17,35 @@ exports.loginPOST = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.render("user/userLogin", { error: "User not registered" });
+      return res.render("user/userLogin", {
+        error: "User not registered",
+        email,
+      });
     }
 
     if (user.status === "blocked") {
-      return res.render("user/userLogin", { error: `${email} is blocked` });
+      return res.render("user/userLogin", {
+        error: `${email} is blocked`,
+        email,
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.render("user/userLogin", { error: "Invalid credentials" });
+      return res.render("user/userLogin", {
+        error: "Wrong Email or Password",
+        email,
+      });
     }
 
     req.session.user = user;
 
-    // Redirect to the home page after successful login
-    res.redirect("/");
+    res.redirect("/user/profile");
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
-
-
-
-
 
 // -------------User Signup Page--------------------
 const { OTP, saveOTP } = require("../models/otpModel");
@@ -54,23 +53,17 @@ const nodemailer = require("nodemailer");
 const { generateOTP, sendOTPEmail } = require("../utils/sendOTPutil");
 const crypto = require("crypto");
 
-
 exports.signupGET = (req, res) => {
   res.render("user/userSignup");
 };
 
 const transporter = nodemailer.createTransport({
-  service: 'Gmail',  
+  service: "Gmail",
   auth: {
-    user: process.env.EMAIL,  
-    pass: process.env.PASSWORD,  
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
   },
 });
-
-
-
-
-
 
 // Generate and send OTP, save OTP to database
 exports.signupPOST = async (req, res) => {
@@ -82,7 +75,7 @@ exports.signupPOST = async (req, res) => {
     }
 
     const otp = generateOTP();
-    console.log("first generated otp is "+otp)
+    console.log("first generated otp is " + otp);
     await sendOTPEmail(email, otp);
     await saveOTP(email, otp);
 
@@ -91,8 +84,6 @@ exports.signupPOST = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-
 
 // Verify OTP and save user data to database
 exports.verifyOTP = async (req, res) => {
@@ -117,8 +108,6 @@ exports.verifyOTP = async (req, res) => {
   }
 };
 
-
-
 exports.resendOTP = async (req, res) => {
   try {
     const { email } = req.body;
@@ -128,9 +117,9 @@ exports.resendOTP = async (req, res) => {
     }
 
     const newOtp = generateOTP();
-    console.log("resend OTP is " + newOtp)
-    otpRecord.otp = newOtp;  
-    otpRecord.createdAt = Date.now();  
+    console.log("resend OTP is " + newOtp);
+    otpRecord.otp = newOtp;
+    otpRecord.createdAt = Date.now();
     await otpRecord.save();
 
     await sendOTPEmail(email, newOtp);
@@ -141,52 +130,7 @@ exports.resendOTP = async (req, res) => {
   }
 };
 
-
-// -------------User Profile Page--------------------
-
-exports.getProfilePage = async (req, res) => {
-  try {
-    // Ensure the user is authenticated
-    if (!req.session.user) {
-      return res.redirect("/user/login"); // Redirect to login if not logged in
-    }
-
-    // Fetch user details using the session's userId
-    const user = await User.findById(req.session.user._id).select(
-      "fullName email status"
-    );
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    // Render the profile page with the user details
-    res.render("user/profile", { user });
-  } catch (err) {
-    console.error("Error fetching profile page:", err);
-    res.status(500).send("Server Error");
-  }
-};
-
-
-exports.logoutPOST = (req, res) => {
-  try {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Error during logout:", err);
-        return res.status(500).send("Failed to logout. Please try again.");
-      }
-      res.redirect("/");
-    });
-  } catch (error) {
-    console.error("Error in logoutPOST:", error);
-    res.status(500).send("Server error during logout.");
-  }
-};
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
-
 
 const Product = require("../models/productSchema");
 const Variant = require("../models/variantSchema");
@@ -194,49 +138,7 @@ const mongoose = require("mongoose"); // Import mongoose
 
 exports.home = async (req, res) => {
   try {
-    
-    const products = await Product.aggregate([
-      {
-        $lookup: {
-          from: "variants",
-          localField: "_id",
-          foreignField: "productId",
-          as: "variants",
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          productName: 1,
-          imageUrl: 1,
-          variants: {
-            $arrayElemAt: ["$variants", 0],
-          },
-        },
-      },
-    ]);
-
-    const formattedProducts = products.map((product) => ({
-      _id: product._id,
-      productName: product.productName,
-      imageUrl:
-        Array.isArray(product.imageUrl) && product.imageUrl.length > 0
-          ? product.imageUrl[0]
-          : "/images/default-product.jpg",
-      price: product.variants?.price || null,
-      discountPrice: product.variants?.discountPrice || null,
-    }));
-
-    // console.log(formattedProducts);
-    res.render("user/home", { products: formattedProducts });
-  } catch (err) {
-    console.error("Error fetching products:", err.message);
-    res.status(500).send("Server Error");
-  }
-};
-
-exports.shopAll = async (req, res) => {
-  try {
+    // if (req.session.user) {
     const products = await Product.aggregate([
       {
         $lookup: {
@@ -255,72 +157,186 @@ exports.shopAll = async (req, res) => {
       {
         $project: {
           _id: 1,
+          brand: 1,
           productName: 1,
           imageUrl: 1,
+          "variants._id": 1,
           "variants.color": 1,
           "variants.price": 1,
+          "variants.rating": 1,
           "variants.discountPrice": 1,
           "variants.discountPercentage": 1,
+          "variants.stock": 1,
         },
       },
     ]);
 
     const formattedProducts = products.map((product) => ({
       _id: product._id,
+      brand: product.brand,
       productName: product.productName,
       imageUrl:
         Array.isArray(product.imageUrl) && product.imageUrl.length > 0
           ? product.imageUrl[0]
           : "/images/default-product.jpg",
+      variants_id: product.variants?._id,
+      color: product.variants?.color,
       price: product.variants?.price || null,
+      rating: product.variants?.rating || null,
       discountPrice: product.variants?.discountPrice || null,
       discountPercentage: product.variants?.discountPercentage || null,
+      stock: product.variants.stock,
     }));
 
-    // console.log(formattedProducts);
-    res.render("user/shopAll", { products: formattedProducts });
+    res.render("user/home", { products: formattedProducts });
+    // } else {
+    //   res.status(200).redirect("/user/login");
+    // }
   } catch (err) {
-    console.error("Error fetching products for Shop All page:", err.message);
+    console.error("Error fetching products:", err.message);
     res.status(500).send("Server Error");
   }
 };
 
+// exports.viewProduct = async (req, res) => {
+//   try {
+//     const productId = req.params.id;
+
+//     if (!mongoose.Types.ObjectId.isValid(productId)) {
+//       return res.status(400).send("Invalid Product ID");
+//     }
+
+//     const product = await Product.aggregate([
+//       { $match: { _id: new mongoose.Types.ObjectId(productId) } },
+//       {
+//         $lookup: {
+//           from: "variants",
+//           localField: "_id",
+//           foreignField: "productId",
+//           as: "variants",
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 1,
+//           productName: 1,
+//           imageUrl: 1,
+//           gender: 1,
+//           brand: 1,
+//           categoriesId: 1,
+//           "variants._id": 1,
+//           "variants.price": 1,
+//           "variants.discountPrice": 1,
+//           "variants.discountPercentage": 1,
+//           "variants.rating": 1,
+//           "variants.color": 1,
+//           "variants.stock": 1,
+//         },
+//       },
+//     ]);
+
+//     if (!product || product.length === 0) {
+//       return res.status(404).send("Product not found");
+//     }
+
+//     // Format product data
+//     const formattedProduct = {
+//       _id: product[0]._id, // Ensure _id is accessible
+//       productName: product[0].productName,
+//       imageUrl: product[0].imageUrl,
+//       gender: product[0].gender,
+//       brand: product[0].brand,
+//       categoriesId: product[0].categoriesId,
+//       variants: product[0].variants.map((variant) => ({
+//         variants_id: variant._id,
+//         price: variant.price || "N/A",
+//         discountPrice: variant.discountPrice || "N/A",
+//         discountPercentage: variant.discountPercentage || "N/A",
+//         rating: variant.rating || "No rating",
+//         color: variant.color || "Unknown",
+//         stock: variant.stock,
+//       })),
+//     };
+//     ////////////////////////////
+//     const products = await Product.aggregate([
+//       {
+//         $lookup: {
+//           from: "variants",
+//           localField: "_id",
+//           foreignField: "productId",
+//           as: "variants",
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: "$variants",
+//           preserveNullAndEmptyArrays: true,
+//         },
+//       },
+//       {
+//         $match: {
+//           categoriesId: formattedProduct.categoriesId,
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 1,
+//           brand: 1,
+//           productName: 1,
+//           imageUrl: 1,
+//           "variants._id": 1,
+//           "variants.color": 1,
+//           "variants.price": 1,
+//           "variants.rating": 1,
+//           "variants.discountPrice": 1,
+//           "variants.discountPercentage": 1,
+//           "variants.stock": 1,
+//         },
+//       },
+//     ]);
+
+//     const formattedRelatedProducts = products.map((product) => ({
+//       _id: product._id,
+//       brand: product.brand,
+//       productName: product.productName,
+//       imageUrl:
+//         Array.isArray(product.imageUrl) && product.imageUrl.length > 0
+//           ? product.imageUrl[0]
+//           : "/images/default-product.jpg",
+//       variants_id: product.variants?._id,
+
+//       color: product.variants?.color,
+//       price: product.variants?.price || null,
+//       rating: product.variants?.rating || null,
+//       discountPrice: product.variants?.discountPrice || null,
+//       discountPercentage: product.variants?.discountPercentage || null,
+//       stock: product.variants?.stock,
+//     }));
+
+//     //////////////
+//     res.render("user/viewProduct", {
+//       product: formattedProduct,
+//       relatedProducts: formattedRelatedProducts,
+//     });
+//   } catch (err) {
+//     console.error("Error fetching product:", err.message);
+//     res.status(500).send("Server Error");
+//   }
+// };
 
 
 
-// Function to handle profile update (POST request)
-exports.updateProfile = async (req, res) => {
-  const { fullName, email, mobile } = req.body;
-
-  // Simple validation (you can enhance this)
-  if (!fullName || !email || !mobile) {
-      return res.status(400).send("All fields are required.");
-  }
-
-  try {
-      // Find the user and update their profile
-      const updatedUser = await User.findByIdAndUpdate(
-          req.user.id,
-          { fullName, email, mobile },
-          { new: true } // Return the updated user object
-      );
-
-      // Redirect to the profile page after update
-      res.redirect("/user/profile");
-  } catch (error) {
-      console.error(error);
-      res.status(500).send("Failed to update profile");
-  }
-};
 
 exports.viewProduct = async (req, res) => {
   try {
     const productId = req.params.id;
-
+    
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).send("Invalid Product ID");
     }
-
+    
+    const offers = await Offer.find({ isActive: true });
+    // Fetch product with its variants
     const product = await Product.aggregate([
       { $match: { _id: new mongoose.Types.ObjectId(productId) } },
       {
@@ -338,7 +354,8 @@ exports.viewProduct = async (req, res) => {
           imageUrl: 1,
           model: 1,
           brand: 1,
-          categoriesId : 1,
+          categoriesId: 1,
+          "variants._id": 1,
           "variants.price": 1,
           "variants.discountPrice": 1,
           "variants.discountPercentage": 1,
@@ -355,13 +372,14 @@ exports.viewProduct = async (req, res) => {
 
     // Format product data
     const formattedProduct = {
-      _id: product[0]._id, // Ensure _id is accessible
+      _id: product[0]._id,
       productName: product[0].productName,
       imageUrl: product[0].imageUrl,
       model: product[0].model,
       brand: product[0].brand,
       categoriesId: product[0].categoriesId,
       variants: product[0].variants.map((variant) => ({
+        variants_id: variant._id,
         price: variant.price || "N/A",
         discountPrice: variant.discountPrice || "N/A",
         discountPercentage: variant.discountPercentage || "N/A",
@@ -370,69 +388,98 @@ exports.viewProduct = async (req, res) => {
         stock: variant.stock,
       })),
     };
-////////////////////////////
- const products = await Product.aggregate([
-  {
-    $lookup: {
-      from: "variants",
-      localField: "_id",
-      foreignField: "productId",
-      as: "variants",
-    },
-  },
-  {
-    $unwind: {
-      path: "$variants",
-      preserveNullAndEmptyArrays: true,
-    },
-  },
-  {
-    $match: {
-      categoriesId: formattedProduct.categoriesId, 
-    },
-  },
-  {
-    $project: {
-      _id: 1,
-      brand: 1,
-      productName: 1,
-      imageUrl: 1,
-      "variants.color": 1,
-      "variants.price": 1,
-      "variants.rating": 1,
-      "variants.discountPrice": 1,
-      "variants.discountPercentage": 1,
-      "variants.stock": 1,
-    },
-  },
-]);
 
-const formattedRelatedProducts = products.map((product) => ({
-  _id: product._id,
-  brand: product.brand,
-  productName: product.productName,
-  imageUrl:
-    Array.isArray(product.imageUrl) && product.imageUrl.length > 0
-      ? product.imageUrl[0]
-      : "/images/default-product.jpg",
-  color: product.variants?.color,
-  price: product.variants?.price || null,
-  rating: product.variants?.rating || null,
-  discountPrice: product.variants?.discountPrice || null,
-  discountPercentage: product.variants?.discountPercentage || null,
-  stock: product.variants?.stock,
-}));
+    // Calculate applicable offer
+    const categoryOffers = offers.filter(
+      (offer) =>
+        offer.applicableCategory?.toString() ===
+        formattedProduct.categoriesId?.toString()
+    );
+    const productOffers = offers.filter(
+      (offer) =>
+        offer.applicableProduct?.toString() === formattedProduct._id.toString()
+    );
 
-//////////////
+    const bestOffer = [...categoryOffers, ...productOffers].reduce(
+      (maxOffer, currentOffer) =>
+        !maxOffer ||
+        currentOffer.discountPercentage > maxOffer.discountPercentage
+          ? currentOffer
+          : maxOffer,
+      null
+    );
+    // console.log(98989898);
+    // console.log(bestOffer);
+
+    // Fetch related products
+    const products = await Product.aggregate([
+      {
+        $lookup: {
+          from: "variants",
+          localField: "_id",
+          foreignField: "productId",
+          as: "variants",
+        },
+      },
+      {
+        $unwind: {
+          path: "$variants",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          categoriesId: formattedProduct.categoriesId,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          brand: 1,
+          productName: 1,
+          imageUrl: 1,
+          "variants._id": 1,
+          "variants.color": 1,
+          "variants.price": 1,
+          "variants.rating": 1,
+          "variants.discountPrice": 1,
+          "variants.discountPercentage": 1,
+          "variants.stock": 1,
+        },
+      },
+    ]);
+
+    const formattedRelatedProducts = products.map((product) => ({
+      _id: product._id,
+      brand: product.brand,
+      productName: product.productName,
+      imageUrl:
+        Array.isArray(product.imageUrl) && product.imageUrl.length > 0
+          ? product.imageUrl[0]
+          : "/images/default-product.jpg",
+      variants_id: product.variants?._id,
+      color: product.variants?.color,
+      price: product.variants?.price || null,
+      rating: product.variants?.rating || null,
+      discountPrice: product.variants?.discountPrice || null,
+      discountPercentage: product.variants?.discountPercentage || null,
+      stock: product.variants?.stock,
+    }));
+
+    
+    // Render the view with product, related products, and the best offer
+
     res.render("user/viewProduct", {
       product: formattedProduct,
       relatedProducts: formattedRelatedProducts,
+      offer: bestOffer,
     });
   } catch (err) {
     console.error("Error fetching product:", err.message);
     res.status(500).send("Server Error");
   }
 };
+
 
 exports.getVariantDetails = async (req, res) => {
   try {
@@ -458,13 +505,14 @@ exports.getVariantDetails = async (req, res) => {
       return res.status(404).json({ message: "Variant not found." });
     }
 
-    // console.log(variant);
+    //console.log(variant);
     res.json(variant);
   } catch (error) {
     console.error("Error fetching variant details:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 };
+
 
 // search
 
@@ -527,3 +575,7 @@ exports.search = async (req, res) => {
     res.status(500).send("An error occurred while searching for products.");
   }
 };
+
+
+
+

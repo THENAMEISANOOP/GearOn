@@ -4,6 +4,7 @@ const adminController = require("../controllers/adminController");
 const uploadMiddleware = require("../middleware/uploadMiddleware");
 const checkSession = require("../middleware/checkSession");
 const adminAuthenticated = require("../middleware/adminauthmildware");
+const checkUserStatus = require("../middleware/checkUserStatus");
 
 // router.use((req, res, next) => {
 //     req.session.admin = true;
@@ -18,9 +19,9 @@ router.post("/logout", adminAuthenticated, adminController.logout);
 // Admin dashboard
 router.get("/dashboard", adminAuthenticated, adminController.getDashboard);
 // Admin  Customers
-router.get("/customers", adminController.getCustomers);
+router.get("/customers",adminController.getCustomers);
 router.post("/customers/unblock/:id", adminController.unblockCustomer);
-router.post("/customers/block/:id", adminController.blockCustomer);
+router.post("/customers/block/:id",adminController.blockCustomer);
 router.post("/customers/updateStatus/:id", adminController.updateStatus);
 
 router.get("/category", adminController.getCategories);
@@ -63,6 +64,21 @@ const adminOrders = require("../controllers/admin/adminOrdersController");
 router.get("/orders", adminOrders.getAdminOrders);
 router.get("/orders/details/:id", adminOrders.getAdminOrdersDetails);
 router.post("/orders/update-status", adminOrders.updateOrderStatus);
+
+// Admin Offer
+const adminOffer = require("../controllers/admin/adminOfferController");
+
+router.get("/offer", adminOffer.getAdminOffers);
+router.post("/offer/add", adminOffer.addOffer);
+router.post("/offer/update", adminOffer.updateOffer);
+router.delete("/offer/delete/:offerId", adminOffer.deleteOffer);
+
+// Admin Coupon
+const adminCoupon = require("../controllers/admin/adminCouponController");
+
+router.get("/coupon", adminCoupon.getAdminCoupon);
+router.post("/coupon/add", adminCoupon.addCoupon);
+router.post("/coupon/update", adminCoupon.updateCoupon);
 
 
 

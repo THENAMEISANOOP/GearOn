@@ -1,63 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products - <%= model %></title>
-  <link rel="stylesheet" href="/styles/main.css">
-</head>
-<body>
-  <div class="container">
-    <h1 class="text-2xl font-semibold text-center my-6">Products for "<%= model %>"</h1>
+// search
+
+exports.search = async (req, res) => {
+  try {
+    const { query } = req.query; // Get the search query from the URL query string
+
+    // Ensure the query exists
+    if (!query) {
+      return res.status(400).send("Query parameter is required.");
+    }
+
+    // Perform an aggregation with $lookup
+    const products = await Product.aggregate([
+      {
+        $lookup: {
+          from: "variants", // Name of the collection to join
+          localField: "_id", // Field from the 'Product' collection
+          foreignField: "productId", // Field from the 'variants' collection
+          as: "variants", // Output array field
+        },
+      },
+      {
+        $unwind: {
+          path: "$variants", // Unwind the joined variants
+          preserveNullAndEmptyArrays: true, // Keep products without variants
+        },
+      },
+      {
+        $match: {
+          $or: [
+            { productName: { $regex: query, $options: "i" } },
+            { brand: { $regex: query, $options: "i" } },
+            { model: { $regex: query, $options: "i" } },
+          ],
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          brand: 1,
+          productName: 1,
+          imageUrl: 1,
+          "variants.color": 1,
+          "variants.price": 1,
+          "variants.rating": 1,
+          "variants.discountPrice": 1,
+          "variants.discountPercentage": 1,
+          "variants.stock": 1,
+        },
+      },
+    ]);
 
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <!-- Loop through the products array -->
-      <% if (products.length > 0) { %>
-        <% products.forEach(product => { %>
-          <div class="bg-white rounded-lg shadow-md p-4 flex flex-col">
-            <a href="/product/<%= product._id %>">
-              <!-- Use default image if product.imageUrl is missing -->
-              <img
-                class="w-full h-auto rounded-lg mb-4"
-                src="<%= product.imageUrl ? product.imageUrl[0] : '/images/default.jpg' %>"
-                alt="<%= product.productName %>"
-              />
-            </a>
-            <h3 class="text-lg font-semibold text-gray-800"><%= product.productName %></h3>
-            
-            <!-- Display price and discount price -->
-            <% if (product.variants) { %>
-              <% const variant = product.variants; %>
-              <div class="flex gap-2">
-                <div class="text-xl font-bold text-gray-900">
-                  ₹<%= variant.discountPrice ? variant.discountPrice.toLocaleString() : 'N/A' %>
-                </div>
-                <% if (variant.price) { %>
-                  <div class="text-gray-500 line-through mt-1">
-                    ₹<%= variant.price.toLocaleString() %>
-                  </div>
-                <% } %>
-              </div>
-            <% } else { %>
-              <div class="text-xl font-bold text-gray-900">
-                Price Not Available
-              </div>
-            <% } %>
-            
-            <div class="flex justify-between items-center mt-4">
-              <div></div>
-              <a href="#" class="hover:text-slate-500">
-                <i class="fa-regular fa-heart"></i>
-              </a>
-            </div>
-          </div>
-        <% }); %>
-      <% } else { %>
-        <p class="text-white">No products found matching your search.</p>
-      <% } %>
-    </div>
-    
-  </div>
-</body>
-</html>
+
+    // Render the search results in the 'user/searchResults' view
+    res.render("user/searchResults", { products, query }); // Correct the path based on your folder structure
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred while searching for products.");
+  }
+};
+
+
+
+

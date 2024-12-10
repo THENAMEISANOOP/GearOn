@@ -8,6 +8,7 @@ const ShopAllController = require("../controllers/user/ShopAllController");
 
 
 
+
 // app.use(
 //   session({
 //     secret: "your-secret-key",
@@ -18,10 +19,23 @@ const ShopAllController = require("../controllers/user/ShopAllController");
 
 
 
-
+// user login 
 
 router.get("/user/login", User.loginGET);
-router.post("/user/login", User.loginPOST);
+router.post("/user/login",User.loginPOST);
+
+// forgot pasword
+
+//--------------------user Login --------------------
+const forgotPassword = require("../controllers/forgotPasswordController");
+
+router.get("/user/forgotPassword", forgotPassword.getForgotPassword);
+router.post("/user/forgotPassword/send-otp", forgotPassword.sendForgotPasswordOTP);
+router.post("/user/forgotPassword/verify-otp", forgotPassword.verifyForgotPasswordOTP);
+router.post("/user/forgotPassword/reset-password", forgotPassword.resetPassword);
+router.post("/user/forgotPassword/resend-otp", forgotPassword.resendForgotPasswordOTP);
+
+
 
 router.get("/user/signup", User.signupGET);
 router.post("/user/signup", User.signupPOST);
@@ -64,7 +78,7 @@ router.get("/user/order/details/:id",userAuthenticated, myOrders.getOrderDetails
 router.post("/order/cancel", myOrders.cancelOrderItem);
 
 
-router.post("/user/logout", User.logoutPOST);
+router.post("/user/logout", userProfileController.logoutPOST);
 
 
 
@@ -97,9 +111,15 @@ router.get("/cart/checkout", userAuthenticated, checkoutController.getCheckout);
 router.post("/user/checkout", checkoutController.placeOrder);
 
 
+// view home
+
 router.get("/", User.home);
 
+//--------------------View Product Page --------------------
 router.get("/product/:id", User.viewProduct);
+
+router.get("/product/getcolor/variant", User.getVariantDetails);
+
 
 
 //--------------------SHOP ALL Page --------------------
@@ -124,5 +144,30 @@ router.get("/bikeModels", bikeController.getBikeModelsPage);
 
 // Route to display products for a specific bike model
 router.get("/products", bikeController.modelfilterControl);
+
+
+//--------------------Wishlist----------------------------------------- 
+const wishlistController = require("../controllers/user/wishlistController");
+
+router.get("/user/wishlist", userAuthenticated, wishlistController.getWishlist);
+router.post("/wishlist/add",  wishlistController.addToWishlist);
+router.delete('/wishlist/remove/:wishlistId', wishlistController.removeFromWishlist);
+
+
+// /-------------------- Wallet Dashboard --------------------
+const userWallet = require("../controllers/user/walletController");
+
+router.get("/user/wallet", userAuthenticated,userWallet.getWallet);
+
+
+
+
+
+
+
+
+
+
+
 
 module.exports = router;

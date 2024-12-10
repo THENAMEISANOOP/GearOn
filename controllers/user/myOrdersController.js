@@ -2,7 +2,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categoryModel");
 const Variant = require("../../models/variantSchema");
 const mongoose = require("mongoose");
-// const Cart = require("../../models/cartModel");
+const Cart = require("../../models/cartModel");
 
 
 const Order = require("../../models/orderModel");
@@ -29,7 +29,7 @@ exports.getMyOrders = async (req, res) => {
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-        hour12: true, 
+        hour12: true,
       }),
       totalPrice: order.totalPrice,
       paymentMethod: order.paymentMethod,
@@ -41,9 +41,9 @@ exports.getMyOrders = async (req, res) => {
         discountPrice: item.variant.discountPrice,
         quantity: item.quantity,
         orderStatus: item.orderStatus,
+        itemTotalPrice: item.itemTotalPrice,
       })),
     }));
-
 
     res.render("user/userMyOrders", {
       orders: ordersWithDetails,
@@ -79,10 +79,11 @@ exports.getOrderDetails = async (req, res) => {
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-        hour12: true, 
+        hour12: true,
       }),
+      couponValue : order.couponValue,
       totalPrice: order.totalPrice,
-      paymentMethod: order.paymentMethod,
+      paymentMethod: order.payment.paymentMethod,
       items: order.orderItems.map((item) => ({
         orderItemId: item._id,
         orderId: item.order_id,
@@ -93,6 +94,11 @@ exports.getOrderDetails = async (req, res) => {
         discountPrice: item.variant.discountPrice,
         quantity: item.quantity,
         orderStatus: item.orderStatus,
+        offerPercentage: item.offerPercentage,
+        offerAmount: item.offerAmount,
+        priceAfterOffer: item.priceAfterOffer,
+        priceWithoutOffer: item.priceWithoutOffer,
+        itemTotalPrice: item.itemTotalPrice,
       })),
       shippingAddress: {
         name: order.shippingAddress.Name,
@@ -165,5 +171,100 @@ exports.cancelOrderItem = async (req, res) => {
   } catch (error) {
     console.error("Error canceling order item:", error);
     res.status(500).json({ message: "Internal Server Error." });
+  }
+};
+
+
+exports.submitReturnRequest = async (req, res) => {
+  try {
+    const { orderItemId, reason } = req.body;
+
+    if (!reason.trim()) {
+      return res.status(400).json({ message: "Return reason is required." });
+    }
+
+    // Find the order containing the order item
+    const order = await Order.findOne({
+      "orderItems._id": orderItemId,
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order item not found." });
+    }
+
+    // Locate the specific order item
+    const orderItem = order.orderItems.find(
+      (item) => item._id.toString() === orderItemId
+    );
+
+    if (!orderItem) {
+      return res.status(404).json({ message: "Order item not found." });
+    }
+
+    // Check if the order status already indicates a return request
+    if (
+      orderItem.orderStatus === "return-requested" ||
+      orderItem.orderStatus === "return-approved"
+    ) {
+      return res.status(400).json({
+        message: "Return request has already been submitted or processed.",
+      });
+    }
+
+    // Update the order status to "return-requested" and set the reason
+    orderItem.orderStatus = "Return-Requested";
+    orderItem.returnReason = reason;
+
+    // Save the updated order
+    await order.save();
+
+    res.status(200).json({ message: "Return request submitted successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to submit return request." });
+  }
+};
+
+
+exports.cancelReturnRequest = async (req, res) => {
+  try {
+    const { orderItemId } = req.body;
+
+    // Find the order containing the order item
+    const order = await Order.findOne({
+      "orderItems._id": orderItemId,
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order item not found." });
+    }
+
+    // Locate the specific order item
+    const orderItem = order.orderItems.find(
+      (item) => item._id.toString() === orderItemId
+    );
+
+    if (!orderItem) {
+      return res.status(404).json({ message: "Order item not found." });
+    }
+
+    // Check if the order status is eligible for cancellation
+    if (orderItem.orderStatus !== "Return-Requested") {
+      return res.status(400).json({
+        message: "Return request cannot be canceled at this stage.",
+      });
+    }
+
+    // Update the order status to "Processing" or the appropriate default status
+    orderItem.orderStatus = "Return-Cancelled"; // Or "Delivered" depending on your workflow
+    orderItem.returnReason = null; // Clear the return reason if needed
+
+    // Save the updated order
+    await order.save();
+
+    res.status(200).json({ message: "Return request canceled successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to cancel return request." });
   }
 };

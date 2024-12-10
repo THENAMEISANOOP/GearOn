@@ -28,7 +28,8 @@
         <nav class="hidden lg:flex items-center space-x-8">
             <a href="/shopall" class="hover:text-yellow-500">ShopAll</a>
             <!-- <a href="#" class="hover:text-yellow-500">Category</a> -->
-            <a href="#" class="hover:text-yellow-500">Contact Us</a>
+           
+            
         </nav>
 
         <!-- User Greeting or Login Option and Cart Icon -->
@@ -44,6 +45,11 @@
                     <span>Login</span>
                 </a>
             <% } %>
+            <div class="flex items-center space-x-4">
+                <a href="/user/wishlist" class="hover:ring-2 hover:ring-yellow-500 text-white">
+                    <i class="fas fa-heart"></i>
+                </a>
+            </div>
             <a href="/shop/cart" class="hover:text-yellow-500">
                 <i class="fa-solid fa-cart-shopping text-lg"></i>
             </a>
@@ -58,8 +64,7 @@
     <!-- Mobile Menu (Visible on Small Screens) -->
     <div id="mobile-menu" class="lg:hidden bg-gray-800 text-white hidden space-y-2 px-4 py-2">
         <a href="#" class="block hover:bg-gray-700 py-2">Explore</a>
-        <a href="#" class="block hover:bg-gray-700 py-2">Category</a>
-        <a href="#" class="block hover:bg-gray-700 py-2">About</a>
+        
         <a href="#" class="block hover:bg-gray-700 py-2">Contact Us</a>
     </div>
 

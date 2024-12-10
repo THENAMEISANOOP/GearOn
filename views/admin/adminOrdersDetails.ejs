@@ -29,10 +29,26 @@
                 </h1>
                 <p class="text-gray-400 mb-2">Order Date: <%= new Date(order.orderDate).toLocaleDateString() %>
                 </p>
-                <p class="text-gray-400 mb-2">Total Amount: ₹<%= order.totalPrice.toLocaleString() %>
-                </p>
                 <p class="text-gray-400">Payment Mode: <%= order.paymentMethod %>
                 </p>
+
+                <div class="mt-4">
+                    <h3 class="text-lg font-semibold text-gray-300">Price Breakdown</h3>
+                    <p class="text-gray-400 ">Subtotal: ₹<%= order.items.reduce((acc, item)=> acc +
+                            item.priceWithoutOffer * item.quantity, 0).toLocaleString() %> </p>
+                    <p class="text-gray-400 ">Total Offer Redemption: -₹<%= order.items.reduce((acc, item)=>
+                            acc + item.offerAmount * item.quantity, 0).toLocaleString() %> </p>
+                    <% if(order.couponValue) {%>
+                        <p class="font-semibold text-gray-400  ">Total Coupon Redemption: -₹<%=
+                                order.couponValue.toLocaleString() %>
+                        </p>
+                        <% } %>
+
+                            <p class="font-semibold text-gray-300  ">Total Amount: ₹<%=
+                                    order.totalPrice.toLocaleString() %>
+                            </p>
+                </div>
+
             </section>
 
             <!-- Section 2: Shipping Address -->
@@ -64,14 +80,14 @@
                         <div class="flex items-center">
                             <!-- 1st Section: Product Image -->
                             <div class="w-40 h-40">
-                                <img src="<%= item.product.imageUrl   %>" alt="<%= item.product.productName %>"
+                                <img src="<%= item.product.imageUrl %>" alt="<%= item.product.productName %>"
                                     class="w-full h-full object-cover rounded-md border border-gray-700" />
                             </div>
 
                             <!-- 2nd Section: Product Brand & Name -->
                             <div class="ml-16 flex-1">
                                 <p class="text-lg font-semibold text-gray-200">
-                                    <%= item.product.productName %> <span class="text-gray-500 font-medium"></span>
+                                    <%= item.product.productName %>
                                 </p>
                                 <p class="text-sm text-gray-400">Color: <%= item.variant.color %>
                                 </p>
@@ -89,60 +105,97 @@
                             <!-- 4th Section: Price -->
                             <div class="ml-4 flex-1">
                                 <p class="text-lg font-medium text-gray-400">
-                                    ₹<%= item.variant.discountPrice.toLocaleString() %>
+                                    ₹<%= item.itemTotalPrice.toLocaleString() %>
                                 </p>
                             </div>
 
-                            <!-- 5th Section: Status -->
-                            <form>
-                                <input type="hidden" name="itemId" value="<%= item._id %>" />
-                                <input type="hidden" name="orderId" value="<%= order._id %>" />
+                            <!-- 5th Section: Status and Return Actions -->
+                            <div class="ml-4 flex-1">
+                                <% if (item.orderStatus==="Return-Requested" ) { %>
+                                    <!-- Show Return Reason -->
+                                    <p class="text-sm text-yellow-400 mb-2">Return Reason: <%= item.returnReason %>
+                                    </p>
 
-                                <% if (item.orderStatus==="Cancelled" ) { %>
-                                    <!-- Show plain text for Cancelled status -->
-                                    <span class="bg-red-500 text-white px-3 py-1 rounded">
-                                        <%= item.orderStatus %>
-                                    </span>
-                                    <% } else if (item.orderStatus==="Delivered" ) { %>
-                                        <!-- Show plain text for Delivered status -->
-                                        <span class="bg-green-500 text-white px-3 py-1 rounded">
-                                            <%= item.orderStatus %>
-                                        </span>
-                                        <% } else { %>
-                                            <!-- Show dropdown for other statuses -->
-                                            <select name="orderStatus"
-                                                class="bg-gray-700 text-white rounded p-2 focus:outline-none">
-                                                <option value="Processing" <%=item.orderStatus==="Processing"
-                                                    ? "selected" : "" %>
-                                                    <%= item.orderStatus !=="Processing" ? "disabled" : "" %>>Processing
-                                                </option>
+                                    <!-- Return Approval Buttons -->
+                                    <div class="flex mt-2">
+                                        <!-- Approve Return Form -->
+                                        <form method="POST" action="/admin/order/approve-return"
+                                            class="return-action-form">
+                                            <input type="hidden" name="orderId" value="<%= order._id %>">
+                                            <input type="hidden" name="itemId" value="<%= item._id %>">
+                                            <button type="submit"
+                                                class="text-sm px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
+                                                Approve Return
+                                            </button>
+                                        </form>
 
-                                                <option value="Shipped" <%=item.orderStatus==="Shipped" ? "selected"
-                                                    : "" %>
-                                                    <%= ["Processing"].includes(item.orderStatus) ? "" : "disabled" %>
-                                                        >Shipped
-                                                </option>
-
-                                                <option value="Delivered" <%=item.orderStatus==="Delivered" ? "selected"
-                                                    : "" %>
-                                                    <%= ["Processing", "Shipped" ].includes(item.orderStatus) ? ""
-                                                        : "disabled" %>>Delivered
-                                                </option>
-
-                                                <option value="Cancelled" <%=item.orderStatus==="Cancelled" ? "selected"
-                                                    : "" %>>Cancelled</option>
-                                            </select>
-                                            <% } %>
+                                        <!-- Reject Return Form -->
+                                        <form method="POST" action="/admin/order/reject-return"
+                                            class="return-action-form ml-2">
+                                            <input type="hidden" name="orderId" value="<%= order._id %>">
+                                            <input type="hidden" name="itemId" value="<%= item._id %>">
+                                            <button type="submit"
+                                                class="text-sm px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md">
+                                                Reject Return
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <% } else{%>
 
 
-                            </form>
 
 
+
+                                        <!-- Status Dropdown -->
+                                        <form method="POST" action="/admin/order/update-status">
+                                            <input type="hidden" name="orderId" value="<%= order._id %>">
+                                            <input type="hidden" name="itemId" value="<%= item._id %>">
+
+                                            <% if (item.orderStatus==="Cancelled" ||
+                                                item.orderStatus==="Return Cancelled" || item.orderStatus==="Returned" )
+                                                { %>
+                                                <span class="bg-red-500 text-white px-3 py-1 rounded">
+                                                    <%= item.orderStatus %>
+                                                </span>
+                                                <% } else if (item.orderStatus==="Delivered" ||
+                                                    item.orderStatus==="Return-Cancelled" ) { %>
+                                                    <span class="bg-green-500 text-white px-3 py-1 rounded">
+                                                        <%= item.orderStatus %>
+                                                    </span>
+                                                    <% } else { %>
+                                                        <!-- Show dropdown for other statuses -->
+                                                        <select name="orderStatus"
+                                                            class="bg-gray-700 text-white rounded p-2 focus:outline-none">
+                                                            <option value="Processing"
+                                                                <%=item.orderStatus==="Processing" ? "selected" : "" %>
+                                                                <%= item.orderStatus !=="Processing" ? "disabled" : ""
+                                                                    %>>Processing
+                                                            </option>
+                                                            <option value="Shipped" <%=item.orderStatus==="Shipped"
+                                                                ? "selected" : "" %>
+                                                                <%= ["Processing"].includes(item.orderStatus) ? ""
+                                                                    : "disabled" %>>Shipped
+                                                            </option>
+                                                            <option value="Delivered" <%=item.orderStatus==="Delivered"
+                                                                ? "selected" : "" %>
+                                                                <%= ["Processing", "Shipped"
+                                                                    ].includes(item.orderStatus) ? "" : "disabled" %>
+                                                                    >Delivered
+                                                            </option>
+                                                            <option value="Cancelled" <%=item.orderStatus==="Cancelled"
+                                                                ? "selected" : "" %>>Cancelled</option>
+                                                        </select>
+                                                        <% } %>
+                                        </form>
+                                                                            <% } %>
+
+
+                            </div>
                         </div>
                     </div>
                     <% }) %>
-
             </section>
+
         </main>
 </body>
 
@@ -194,6 +247,68 @@
             } catch (error) {
                 console.error('Error updating order status:', error);
                 alert('An error occurred while updating the order status.');
+            }
+        });
+    });
+
+    // Attach event listeners to return action forms
+    document.querySelectorAll('.return-action-form').forEach(form => {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const actionUrl = form.getAttribute('action');
+            const formData = new FormData(form);
+            const orderId = formData.get('orderId');
+            const itemId = formData.get('itemId');
+
+            const action = actionUrl.includes('approve') ? 'approve' : 'reject';
+
+            try {
+                // Send AJAX request to handle return action
+                const response = await fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderId,
+                        itemId,
+                        action,  // either 'approve' or 'reject'
+                    }),
+                });
+
+                if (response.ok) {
+                    // Success feedback
+                    const result = await Swal.fire({
+                        title: 'Success!',
+                        text: 'Return request has been processed successfully.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+
+                    // Reload the page if the user clicks OK
+                    if (result.isConfirmed) {
+                        location.reload();
+                    }
+                } else {
+                    // Error handling if something goes wrong
+                    const errorMessage = await response.json();
+                    Swal.fire({
+                        title: 'Error!',
+                        text: errorMessage.message || 'Failed to process the return request.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } catch (error) {
+                // Error handling for unexpected errors
+                console.error('Error processing return request:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An error occurred while processing the return request.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     });
