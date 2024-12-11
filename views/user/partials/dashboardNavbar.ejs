@@ -11,9 +11,12 @@
                 <a href="#" class="hidden md:inline hover:ring-2 hover:ring-yellow-500 text-white">About Us</a>
             </nav>
             <div class="flex items-center space-x-4">
-                <button class="hover:ring-2 hover:ring-yellow-500 text-white">
-                    <i class="fas fa-heart"></i>
-                </button>
+                <a href="/user/wishlist">
+                    <button class="hover:ring-2 hover:ring-yellow-500 text-white">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </a>
+                
                 <!-- User Greeting or Login Option -->
                 <div class="hidden lg:flex items-center space-x-4 ml-8">
                     <% if (user) { %>

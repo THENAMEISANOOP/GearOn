@@ -18,13 +18,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </head>
 
-<body class="bg-gray-900 ">
+<body class="bg-gray-900">
     <!------------ Navbar ---------->
     <%- include("partials/navBar") %>
         <div class="mt-16"></div>
 
-        <div class="font-sans max-w-5xl max-md:max-w-xl mx-auto bg-gray-50 py-16 ">
-            <h1 class="text-3xl font-bold text-gray-800 text-center">
+        <div class="font-sans max-w-5xl max-md:max-w-xl mx-auto bg-gray-800 py-4 pt-12">
+            <h1 class="text-3xl font-bold text-white text-center">
                 Shopping Cart
             </h1>
 
@@ -34,7 +34,7 @@
                 <!-- No items in the cart message -->
                 <div class="grid align-items-center gap-8 mt-16">
                     <div
-                        class="md:col-span-2 space-y-4 p-4 bg-gray-50 shadow-lg text-center text-xl font-medium text-gray-700">
+                        class="md:col-span-2 space-y-4 p-4 bg-gray-500 shadow-lg text-center text-xl font-medium text-gray-700">
                         No items in the cart
 
                         <!-- Continue Shopping Button -->
@@ -50,7 +50,7 @@
                 <% } else { %>
 
                     <div id="cartItemsContainer" class="grid md:grid-cols-3 gap-8 mt-16 b-2">
-                        <div class="md:col-span-2 space-y-4 p-4 bg-gray-50 shadow-lg">
+                        <div class="md:col-span-2 space-y-4 p-4 bg-yellow-50 shadow-lg">
                             <% cartItems.forEach(item=> { %>
                                 <div>
                                     <div class="grid grid-cols-3 items-start gap-4 border-b border-gray-200"
@@ -172,7 +172,7 @@
                                 <% }); %>
                         </div>
 
-                        <div id="orderSummarySection" class="bg-gray-50 shadow-lg rounded-md p-4 h-max">
+                        <div id="orderSummarySection" class="bg-yellow-50 shadow-lg rounded-md p-4 h-max">
                             <h3 class="text-lg max-sm:text-base font-bold text-gray-800 border-b border-gray-300 pb-2">
                                 Order Summary
                             </h3>
@@ -206,11 +206,11 @@
                             <div class="mt-6 space-y-3">
                                 <!-- Checkout Button -->
                                 <button id="checkoutButton" type="button"
-                                    class="text-sm px-4 py-2.5 w-full font-semibold tracking-wide bg-gray-800 hover:bg-gray-900 text-white rounded-md">
+                                    class="text-sm px-4 py-2.5 w-full font-semibold tracking-wide bg-green-500 hover:bg-green-600 text-black rounded-md">
                                     Checkout
                                 </button>
                                 <button type="button" onclick="window.location.href='/shopall'"
-                                    class="text-sm px-4 py-2.5 w-full font-semibold tracking-wide bg-transparent text-gray-800 border border-gray-300 rounded-md">
+                                    class="text-sm px-4 py-2.5 w-full font-semibold tracking-wide bg-yellow-500 text-gray-800 border border-gray-300 rounded-md">
                                     Continue Shopping
                                 </button>
                             </div>

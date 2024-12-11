@@ -1,10 +1,24 @@
-// userauthmiddleware.js
-module.exports = (req, res, next) => {
+const User = require("../models/userModel");  
+
+module.exports = async (req, res, next) => {
   if (req.session.user) {
-    // User is authenticated, continue to the next middleware or route
-    return next();
+
+    const user = await User.findById(req.session.user._id);
+
+    if (user && user.status === "active") {
+      next();
+    } else {
+          req.session.destroy((err) => {
+            if (err) {
+              console.error("Error during logout:", err);
+              return res
+                .status(500)
+                .send("Failed to logout. Please try again.");
+            }
+            res.redirect("/user/login");
+          });
+    }
   } else {
-    // User is not authenticated, redirect to login page
-    return res.redirect("/user/login");
+    res.redirect("/user/login");
   }
 };

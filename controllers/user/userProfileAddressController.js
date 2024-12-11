@@ -69,7 +69,7 @@ exports.logoutPOST = (req, res) => {
         console.error("Error during logout:", err);
         return res.status(500).send("Failed to logout. Please try again.");
       }
-      res.redirect("/home");
+      res.redirect("/");
     });
   } catch (error) {
     console.error("Error in logoutPOST:", error);

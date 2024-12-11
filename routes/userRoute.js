@@ -76,6 +76,8 @@ router.get("/user/orders", userAuthenticated, myOrders.getMyOrders);
 router.get("/user/order/details/:id",userAuthenticated, myOrders.getOrderDetails);
 
 router.post("/order/cancel", myOrders.cancelOrderItem);
+router.post("/order/return", myOrders.submitReturnRequest);
+router.post("/order/cancel-return", myOrders.cancelReturnRequest);
 
 
 router.post("/user/logout", userProfileController.logoutPOST);

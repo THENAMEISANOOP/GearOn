@@ -21,9 +21,11 @@
                     <a href="#" class="hidden md:inline hover:ring-2 hover:ring-yellow-500">About Us</a>
                 </nav>
                 <div class="flex items-center space-x-4">
-                    <button class="hover:ring-2 hover:ring-yellow-500">
-                        <i class="fas fa-heart"></i>
-                    </button>
+                    <a href="/user/wishlist">
+                        <button class="hover:ring-2 hover:ring-yellow-500 text-white">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </a>
                     <!-- User Greeting or Login Option (with added margin-left) -->
                     <div class="hidden lg:flex items-center space-x-4 ml-8">
                         <% if (user) { %>
@@ -38,9 +40,12 @@
                             </a>
                         <% } %>
                     </div>
-                    <button class="hover:ring-2 hover:ring-yellow-500">
-                        <i class="fas fa-shopping-cart"></i>
-                    </button>
+                    <a href="/shop/cart">
+                        <button class="hover:ring-2 hover:ring-yellow-500">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                    </a>
+                    
                 </div>
             </div>
         </div>

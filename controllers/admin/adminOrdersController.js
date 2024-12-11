@@ -52,6 +52,7 @@ exports.getAdminOrdersDetails = [
   async (req, res) => {
     try {
       const { id } = req.params;
+
       const order = await Order.findById(id);
 
       if (!order) {
@@ -68,7 +69,7 @@ exports.getAdminOrdersDetails = [
         totalPrice: order.totalPrice,
         paymentMethod: order.paymentMethod,
         shippingAddress: order.shippingAddress,
-        items: order.orderItems, 
+        items: order.orderItems,
       };
 
       res.render("admin/adminOrdersDetails", { order: mappedOrder });
@@ -85,7 +86,6 @@ exports.updateOrderStatus = [
   adminAuthenticated,
   async (req, res) => {
     try {
-      console.log(222222222);
       const { itemId, orderId, orderStatus } = req.body;
 
       const order = await Order.findById(orderId);
@@ -94,18 +94,14 @@ exports.updateOrderStatus = [
       const item = order.orderItems.id(itemId);
       if (!item) return res.status(404).json({ error: "Item not found" });
 
-      item.orderStatus = orderStatus;
-      await order.save();
-
-      
-      if (orderStatus === "Cancelled") {
+      // Increase stock if order is Cancelled or Returned
+      if (orderStatus === "Cancelled" || orderStatus === "Returned") {
         const variant = await Variant.findById(item.variant.variantId);
         if (!variant) {
           return res
             .status(404)
             .json({ error: "Associated variant not found" });
         }
-
         variant.stock += item.quantity;
         await variant.save();
       }
@@ -120,6 +116,7 @@ exports.updateOrderStatus = [
     }
   },
 ];
+
 
 exports.handleReturnRequest = async (req, res) => {
   try {
@@ -196,5 +193,4 @@ exports.handleReturnRequest = async (req, res) => {
     res.status(500).json({ message: "Failed to process return request." });
   }
 };
-
 

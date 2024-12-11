@@ -1,65 +1,63 @@
-// search
+<!-- Sidebar -->
+<aside class="md:col-span-1 space-y-4 m-6 bg-black">
+  <h2 class="text-xl font-bold mb-6 text-white">My Account</h2>
+  <nav class="space-y-2">
+      <a href="/user/profile" 
+         class="flex items-center space-x-2 p-2 hover:ring-2 hover:ring-yellow-500 rounded-lg text-white">
+          <i class="fas fa-user text-white"></i>
+          <span>Personal Information</span>
+      </a>
+      
+      <a href="/user/address" 
+         class="flex items-center space-x-2 p-2 hover:ring-2 hover:ring-yellow-500 rounded-lg text-white">
+          <i class="fas fa-map-marker-alt text-white"></i>
+          <span>Address</span>
+      </a>
+      
+      <a href="/user/orders" 
+         class="flex items-center space-x-2 p-2 hover:ring-2 hover:ring-yellow-500 rounded-lg text-white">
+          <i class="fas fa-shopping-cart text-white"></i>
+          <span>My Orders</span>
+      </a>
 
-exports.search = async (req, res) => {
-  try {
-    const { query } = req.query; // Get the search query from the URL query string
+      <a href="/user/wallet" 
+         class="flex items-center space-x-2 p-2 hover:ring-2 hover:ring-yellow-500 rounded-lg text-white">
+          <i class="fas fa-shopping-cart text-white"></i>
+          <span>My Wallet</span>
+      </a>
+      
+      <a href="/user/changePassword" 
+         class="flex items-center space-x-2 p-2 hover:ring-2 hover:ring-yellow-500 rounded-lg text-white">
+          <i class="fas fa-lock text-white"></i>
+          <span>Change Password</span>
+      </a>
+      
+      <form action="/user/logout" method="POST">
+          <button type="submit" 
+                  class="w-full bg-red-600 text-white p-2 rounded-lg flex items-center justify-center space-x-2 hover:ring-2 hover:ring-yellow-500 text-white">
+              <i class="fas fa-sign-out-alt text-white"></i>
+              <span>Logout</span>
+          </button>
+      </form>
+      
+      
+  </nav>
+</aside>
 
-    // Ensure the query exists
-    if (!query) {
-      return res.status(400).send("Query parameter is required.");
-    }
+<script>
+  // JavaScript to highlight the active page
+  document.addEventListener("DOMContentLoaded", () => {
+      const links = document.querySelectorAll("nav a");
+      const currentPath = window.location.pathname; // Get the current path
 
-    // Perform an aggregation with $lookup
-    const products = await Product.aggregate([
-      {
-        $lookup: {
-          from: "variants", // Name of the collection to join
-          localField: "_id", // Field from the 'Product' collection
-          foreignField: "productId", // Field from the 'variants' collection
-          as: "variants", // Output array field
-        },
-      },
-      {
-        $unwind: {
-          path: "$variants", // Unwind the joined variants
-          preserveNullAndEmptyArrays: true, // Keep products without variants
-        },
-      },
-      {
-        $match: {
-          $or: [
-            { productName: { $regex: query, $options: "i" } },
-            { brand: { $regex: query, $options: "i" } },
-            { model: { $regex: query, $options: "i" } },
-          ],
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          brand: 1,
-          productName: 1,
-          imageUrl: 1,
-          "variants.color": 1,
-          "variants.price": 1,
-          "variants.rating": 1,
-          "variants.discountPrice": 1,
-          "variants.discountPercentage": 1,
-          "variants.stock": 1,
-        },
-      },
-    ]);
-
-
-
-    // Render the search results in the 'user/searchResults' view
-    res.render("user/searchResults", { products, query }); // Correct the path based on your folder structure
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("An error occurred while searching for products.");
-  }
-};
-
-
+      links.forEach(link => {
+          if (link.getAttribute("href") === currentPath) {
+              link.classList.add("bg-gray-800"); // Add the active class
+          } else {
+              link.classList.remove("bg-gray-800"); // Remove from others
+          }
+      });
+  });
+</script>
 
 
