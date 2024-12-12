@@ -138,7 +138,6 @@ const mongoose = require("mongoose"); // Import mongoose
 
 exports.home = async (req, res) => {
   try {
-    // if (req.session.user) {
     const products = await Product.aggregate([
       {
         $lookup: {
@@ -151,7 +150,7 @@ exports.home = async (req, res) => {
       {
         $unwind: {
           path: "$variants",
-          preserveNullAndEmptyArrays: true,
+          preserveNullAndEmptyArrays: true, // Keeps products even if there are no variants
         },
       },
       {
@@ -171,6 +170,11 @@ exports.home = async (req, res) => {
       },
     ]);
 
+    // Debugging: Print the products array
+    products.forEach((product) => {
+      console.log("Product:", product);
+    });
+
     const formattedProducts = products.map((product) => ({
       _id: product._id,
       brand: product.brand,
@@ -185,146 +189,15 @@ exports.home = async (req, res) => {
       rating: product.variants?.rating || null,
       discountPrice: product.variants?.discountPrice || null,
       discountPercentage: product.variants?.discountPercentage || null,
-      stock: product.variants.stock,
+      stock: product.variants?.stock || "Out of Stock", // Safely access stock
     }));
 
     res.render("user/home", { products: formattedProducts });
-    // } else {
-    //   res.status(200).redirect("/user/login");
-    // }
   } catch (err) {
-    console.error("Error fetching products:", err.message);
+    console.error("Error fetching products for Shop All page:", err.message);
     res.status(500).send("Server Error");
   }
 };
-
-// exports.viewProduct = async (req, res) => {
-//   try {
-//     const productId = req.params.id;
-
-//     if (!mongoose.Types.ObjectId.isValid(productId)) {
-//       return res.status(400).send("Invalid Product ID");
-//     }
-
-//     const product = await Product.aggregate([
-//       { $match: { _id: new mongoose.Types.ObjectId(productId) } },
-//       {
-//         $lookup: {
-//           from: "variants",
-//           localField: "_id",
-//           foreignField: "productId",
-//           as: "variants",
-//         },
-//       },
-//       {
-//         $project: {
-//           _id: 1,
-//           productName: 1,
-//           imageUrl: 1,
-//           gender: 1,
-//           brand: 1,
-//           categoriesId: 1,
-//           "variants._id": 1,
-//           "variants.price": 1,
-//           "variants.discountPrice": 1,
-//           "variants.discountPercentage": 1,
-//           "variants.rating": 1,
-//           "variants.color": 1,
-//           "variants.stock": 1,
-//         },
-//       },
-//     ]);
-
-//     if (!product || product.length === 0) {
-//       return res.status(404).send("Product not found");
-//     }
-
-//     // Format product data
-//     const formattedProduct = {
-//       _id: product[0]._id, // Ensure _id is accessible
-//       productName: product[0].productName,
-//       imageUrl: product[0].imageUrl,
-//       gender: product[0].gender,
-//       brand: product[0].brand,
-//       categoriesId: product[0].categoriesId,
-//       variants: product[0].variants.map((variant) => ({
-//         variants_id: variant._id,
-//         price: variant.price || "N/A",
-//         discountPrice: variant.discountPrice || "N/A",
-//         discountPercentage: variant.discountPercentage || "N/A",
-//         rating: variant.rating || "No rating",
-//         color: variant.color || "Unknown",
-//         stock: variant.stock,
-//       })),
-//     };
-//     ////////////////////////////
-//     const products = await Product.aggregate([
-//       {
-//         $lookup: {
-//           from: "variants",
-//           localField: "_id",
-//           foreignField: "productId",
-//           as: "variants",
-//         },
-//       },
-//       {
-//         $unwind: {
-//           path: "$variants",
-//           preserveNullAndEmptyArrays: true,
-//         },
-//       },
-//       {
-//         $match: {
-//           categoriesId: formattedProduct.categoriesId,
-//         },
-//       },
-//       {
-//         $project: {
-//           _id: 1,
-//           brand: 1,
-//           productName: 1,
-//           imageUrl: 1,
-//           "variants._id": 1,
-//           "variants.color": 1,
-//           "variants.price": 1,
-//           "variants.rating": 1,
-//           "variants.discountPrice": 1,
-//           "variants.discountPercentage": 1,
-//           "variants.stock": 1,
-//         },
-//       },
-//     ]);
-
-//     const formattedRelatedProducts = products.map((product) => ({
-//       _id: product._id,
-//       brand: product.brand,
-//       productName: product.productName,
-//       imageUrl:
-//         Array.isArray(product.imageUrl) && product.imageUrl.length > 0
-//           ? product.imageUrl[0]
-//           : "/images/default-product.jpg",
-//       variants_id: product.variants?._id,
-
-//       color: product.variants?.color,
-//       price: product.variants?.price || null,
-//       rating: product.variants?.rating || null,
-//       discountPrice: product.variants?.discountPrice || null,
-//       discountPercentage: product.variants?.discountPercentage || null,
-//       stock: product.variants?.stock,
-//     }));
-
-//     //////////////
-//     res.render("user/viewProduct", {
-//       product: formattedProduct,
-//       relatedProducts: formattedRelatedProducts,
-//     });
-//   } catch (err) {
-//     console.error("Error fetching product:", err.message);
-//     res.status(500).send("Server Error");
-//   }
-// };
-
-
 
 
 exports.viewProduct = async (req, res) => {
