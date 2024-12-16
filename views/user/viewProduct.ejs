@@ -182,11 +182,18 @@
                         <%= product.brand %>
                       </span>
                     </li>
+                    <li>
+                      <% product.variants.forEach(variant => { %>
+                        Color: <span class="font-semibold text-gray-300"><%= variant.color || 'N/A' %></span>
+                        <br>
+                      <% }) %>
+                    </li>
+                    
                   </ul>
                 </div>
 
                 <!-- Select Color -->
-                <div class="mt-6">
+                <div class="mt-6 invisible">
                   <label for="color" class="block font-medium text-gray-200">Select
                     Color</label>
                   <select id="color" class="mt-2 px-4 py-2 border rounded-lg shadow-sm">

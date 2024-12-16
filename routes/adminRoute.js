@@ -70,18 +70,29 @@ router.post("/order/reject-return", adminOrders.handleReturnRequest);
 // Admin Offer
 const adminOffer = require("../controllers/admin/adminOfferController");
 
-router.get("/offer", adminOffer.getAdminOffers);
+router.get("/offer", adminAuthenticated, adminOffer.getAdminOffers);
 router.post("/offer/add", adminOffer.addOffer);
 router.post("/offer/update", adminOffer.updateOffer);
 router.delete("/offer/delete/:offerId", adminOffer.deleteOffer);
 
 // Admin Coupon
 const adminCoupon = require("../controllers/admin/adminCouponController");
+const validateCoupon = require("../middleware/couponValidation");
 
 router.get("/coupon", adminCoupon.getAdminCoupon);
-router.post("/coupon/add", adminCoupon.addCoupon);
-router.post("/coupon/update", adminCoupon.updateCoupon);
+router.post("/coupon/add", validateCoupon, adminCoupon.addCoupon); // Use the validation middleware
+router.post("/coupon/update", validateCoupon, adminCoupon.updateCoupon); // Use the validation middleware for update
+router.post("/coupon/delete", adminCoupon.deleteCoupon);
 
+
+
+
+// Admin Sales Report
+const adminSalesReport = require("../controllers/admin/adminSalesReportController");
+
+router.get("/salesreport", adminAuthenticated, adminSalesReport.getSalesReport);
+router.get("/sales-report/pdf", adminSalesReport.downloadPDF);
+router.get("/sales-report/excel", adminSalesReport.downloadExcel);
 
 
 module.exports = router;

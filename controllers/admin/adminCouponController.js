@@ -178,96 +178,24 @@ exports.updateCoupon = async (req, res) => {
 
 
 
-// exports.addCoupon = async (req, res) => {
-//     try {
-//         // Extract form data
-//         const {
-//             couponCode,
-//             couponType,
-//             couponValue,
-//             minimumPurchaseAmount,
-//             startDate,
-//             endDate,
-//             perUserUsageLimit,
-//             isActive,
-//         } = req.body;
+exports.deleteCoupon = async (req, res) => {
+    try {
+        const { couponId } = req.body; // Get couponId from the request body
 
-//         // Validate the start and end dates
-//         if (new Date(startDate) > new Date(endDate)) {
-//             return res.status(400).send("Start date cannot be after end date.");
-//         }
+        console.log("Deleting coupon with ID:", couponId); // Debug log
 
-//         // Create a new coupon
-//         const newCoupon = new Coupon({
-//             couponCode,
-//             couponType,
-//             couponValue,
-//             minimumPurchaseAmount,
-//             startDate,
-//             endDate,
-//             perUserUsageLimit,
-//             isActive: isActive === "on", // Convert checkbox value to boolean
-//         });
+        // Find and delete the coupon by ID
+        const deletedCoupon = await Coupon.findByIdAndDelete(couponId);
 
-//         // Save to the database
-//         await newCoupon.save();
+        if (!deletedCoupon) {
+            return res.status(404).json({ message: "Coupon not found." });
+        }
 
-//         // Redirect to the coupon management page with success message
-//         res.redirect("/admin/coupon");
-//     } catch (error) {
-//         console.error("Error adding coupon:", error);
-//         // Handle unique constraint or validation errors gracefully
-//         if (error.code === 11000) {
-//             return res.status(400).send("Coupon code must be unique.");
-//         }
-//         res.status(500).send("An error occurred while adding the coupon.");
-//     }
-// };
+        console.log("Coupon deleted:", deletedCoupon); // Debug log
 
-// exports.updateCoupon = async (req, res) => {
-//     try {
-//         // Extract form data
-//         const {
-//             couponId,
-//             couponCode,
-//             couponType,
-//             couponValue,
-//             minimumPurchaseAmount,
-//             startDate,
-//             endDate,
-//             perUserUsageLimit,
-//             isActive,
-//         } = req.body;
-
-//         // Find the coupon by ID
-//         const coupon = await Coupon.findById(couponId);
-
-//         if (!coupon) {
-//             return res.status(404).send("Coupon not found.");
-//         }
-
-//         // Validate start and end dates
-//         if (new Date(startDate) > new Date(endDate)) {
-//             return res.status(400).send("Start date cannot be after end date.");
-//         }
-
-//         // Update coupon data
-//         coupon.couponCode = couponCode;
-//         coupon.couponType = couponType;
-//         coupon.couponValue = couponValue;
-//         coupon.minimumPurchaseAmount = minimumPurchaseAmount;
-//         coupon.startDate = startDate;
-//         coupon.endDate = endDate;
-//         coupon.perUserUsageLimit = perUserUsageLimit;
-//         coupon.isActive = isActive === "on"; // Convert checkbox value to boolean
-
-//         // Save the updated coupon
-//         await coupon.save();
-
-//         // Redirect to the coupon management page with a success message
-//         res.redirect("/admin/coupon");
-//     } catch (error) {
-//         console.error("Error updating coupon:", error);
-//         res.status(500).send("An error occurred while updating the coupon.");
-//     }
-// };
+        res.json({ success: true }); // Send success response
+    } catch (error) {
+        console.error("Error deleting coupon:", error);
+        res.status(500).json({ message: "An error occurred while deleting the coupon." });
+    }
+};
