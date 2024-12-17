@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer");
 const { generateOTP, sendOTPEmail } = require("../utils/sendOTPutil");
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
-const userAuthenticated = require("../middleware/userauthmildware");
+const userAuthenticated = require("../middleware/userauthmiddleware");
 
 exports.getForgotPassword = (req, res) => {
   res.render("user/forgotPassword");

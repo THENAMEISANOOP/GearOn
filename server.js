@@ -28,12 +28,17 @@ app.use(nocache());
 
 app.use(
   session({
-    secret: "your_secret_key", // Secret key for signing the session cookie
-    resave: false,
-    saveUninitialized: false,  // Don't save session if not modified
-    cookie: { maxAge: 604800000 }, // Cookie will expire in 7 days (in milliseconds)
+    secret: "your_secret_key", // Change to a secure key in production
+    resave: false, // Avoid resaving sessions unnecessarily
+    saveUninitialized: false, // Don't create sessions until something is stored
+    cookie: {
+      maxAge: 604800000, // 7 days in milliseconds
+      secure: false, // Set to true in HTTPS (production)
+      httpOnly: true, // Prevent client-side JavaScript access
+    },
   })
 );
+
 
 
 // server.js

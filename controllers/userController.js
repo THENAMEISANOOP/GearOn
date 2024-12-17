@@ -1,7 +1,7 @@
 const User = require("../models/userModel");
 const Offer = require("../models/offerModel")
 const bcrypt = require("bcryptjs");
-const userAuthenticated = require("../middleware/userauthmildware");
+const userAuthenticated = require("../middleware/userauthmiddleware");
 
 // -------------User Login Page--------------------
 exports.loginGET = (req, res) => {

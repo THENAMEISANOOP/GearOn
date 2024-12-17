@@ -1,7 +1,7 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const router = express.Router();
-const userAuthenticated = require("../middleware/userauthmildware");
+const userAuthenticated = require("../middleware/userauthmiddleware");
 const userProfileController = require("../controllers/user/userProfileAddressController");
 const User = require("../controllers/userController");
 const ShopAllController = require("../controllers/user/ShopAllController");
@@ -9,13 +9,7 @@ const ShopAllController = require("../controllers/user/ShopAllController");
 
 
 
-// app.use(
-//   session({
-//     secret: "your-secret-key",
-//     resave: false,
-//     saveUninitialized: false,
-//   })
-// );
+
 
 
 
@@ -115,7 +109,7 @@ router.post("/user/checkout", checkoutController.placeOrder);
 
 // view home
 
-router.get("/", User.home);
+router.get("/",  User.home);
 
 //--------------------View Product Page --------------------
 router.get("/product/:id", User.viewProduct);
@@ -141,11 +135,7 @@ router.get('/search', User.search);
 
 const bikeController = require("../controllers/user/bikeController");
 
-// Route to display bike models
-router.get("/bikeModels", bikeController.getBikeModelsPage);
 
-// Route to display products for a specific bike model
-router.get("/products", bikeController.modelfilterControl);
 
 
 //--------------------Wishlist----------------------------------------- 
@@ -158,6 +148,7 @@ router.delete('/wishlist/remove/:wishlistId', wishlistController.removeFromWishl
 
 // /-------------------- Wallet Dashboard --------------------
 const userWallet = require("../controllers/user/walletController");
+const userauthmildware = require("../middleware/userauthmiddleware");
 
 router.get("/user/wallet", userAuthenticated,userWallet.getWallet);
 

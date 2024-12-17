@@ -229,7 +229,7 @@ async function handleOTPVerification(event) {
     if (response.status === 201) {
       swal("", data.message, "success");
 
-      window.location.href = "/home";
+      window.location.href = "/";
     } else {
       document.getElementById("otp-error").textContent = data.message;
     }
