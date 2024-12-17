@@ -205,45 +205,52 @@
                 }
 
                 async function placeOrder() {
-                    const selectedAddress = document.querySelector("input[name='selectedAddress']:checked")?.value;
-                    const paymentMethod = document.querySelector("input[name='paymentMethod']:checked")?.value;
+    const selectedAddress = document.querySelector("input[name='selectedAddress']:checked")?.value;
+    const paymentMethod = document.querySelector("input[name='paymentMethod']:checked")?.value;
 
-                    if (!selectedAddress || !paymentMethod) {
-                        Swal.fire("Error", "Please select an address and payment method.", "error");
-                        return;
+    if (!selectedAddress || !paymentMethod) {
+        Swal.fire("Error", "Please select an address and payment method.", "error");
+        return;
+    }
+
+    // Check if payment method is Cash on Delivery and the total amount is greater than 1000
+    if (paymentMethod === 'Cash on Delivery' && subtotal > 1000) {
+        Swal.fire("Error", "Cash on Delivery is not allowed for orders greater than ₹1000.", "error");
+        return;
+    }
+
+    try {
+        const response = await axios.post("/user/checkout", {
+            selectedAddress,
+            paymentMethod,
+            appliedCouponCode: selectedCouponCode,
+        });
+
+        if (response.status === 200) {
+            const data = response.data;
+
+            if (paymentMethod === 'Online Payment') {
+                handleRazorpayPayment(data.order);
+            } else if (paymentMethod === 'Cash on Delivery' || paymentMethod === 'Wallet') {
+                Swal.fire({
+                    icon: "success",
+                    title: "Order Placed!",
+                    text: data.message,
+                    showConfirmButton: true,
+                    confirmButtonText: "OK",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "/user/orders";
                     }
+                });
+            }
+        }
+    } catch (error) {
+        console.error("Error placing order:", error);
+        Swal.fire("Error", error.response?.data?.message || "An error occurred while placing the order.", "error");
+    }
+}
 
-                    try {
-                        const response = await axios.post("/user/checkout", {
-                            selectedAddress,
-                            paymentMethod,
-                            appliedCouponCode: selectedCouponCode,
-                        });
-
-                        if (response.status === 200) {
-                            const data = response.data;
-
-                            if (paymentMethod === 'Online Payment') {
-                                handleRazorpayPayment(data.order);
-                            } else if (paymentMethod === 'Cash on Delivery' || paymentMethod === 'Wallet') {
-                                Swal.fire({
-                                    icon: "success",
-                                    title: "Order Placed!",
-                                    text: data.message,
-                                    showConfirmButton: true,
-                                    confirmButtonText: "OK",
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        window.location.href = "/user/orders";
-                                    }
-                                });
-                            }
-                        }
-                    } catch (error) {
-                        console.error("Error placing order:", error);
-                        Swal.fire("Error", error.response?.data?.message || "An error occurred while placing the order.", "error");
-                    }
-                }
 
                 function handleRazorpayPayment(order) {
                     const options = {

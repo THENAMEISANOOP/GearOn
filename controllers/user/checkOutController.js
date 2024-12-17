@@ -180,7 +180,6 @@ exports.placeOrder = async (req, res) => {
     const activeOffers = await Offer.find({ isActive: true });
 
     let subtotal = 0;
-    let totalPrice = 0;
 
     const orderItems = cartItems.map((item) => {
       const product = item.productId;
@@ -218,20 +217,7 @@ exports.placeOrder = async (req, res) => {
 
       subtotal += itemTotalPrice;
 
-      const generateOrderID = () => {
-        const characters =
-          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        let orderID = "#";
-        for (let i = 0; i < 5; i++) {
-          orderID += characters.charAt(
-            Math.floor(Math.random() * characters.length)
-          );
-        }
-        return orderID;
-      };
-
       return {
-        order_id: generateOrderID(),
         product: {
           productId: product._id,
           brand: product.brand,
@@ -244,25 +230,17 @@ exports.placeOrder = async (req, res) => {
           discountPrice: variant.discountPrice,
         },
         quantity: item.quantity,
-        orderStatus: "Processing",
-        offerType: bestOffer.offerType || null,
-        offerTitle: bestOffer.title || null,
-        offerPercentage,
-        offerAmount,
         priceAfterOffer,
-        priceWithoutOffer: discountPrice,
         itemTotalPrice,
-        priceWithoutCoupon: itemTotalPrice,
-        CouponAmountOfItem: 0,
-        priceAfterCoupon: itemTotalPrice,
       };
-
     });
-    // Check and apply the coupon
+
+    // Check and apply coupon
     let couponDiscount = 0;
-    let coupon;
+    let totalPrice = subtotal;
+
     if (appliedCouponCode) {
-      coupon = await Coupon.findOne({
+      const coupon = await Coupon.findOne({
         couponCode: appliedCouponCode,
         isActive: true,
       });
@@ -273,70 +251,36 @@ exports.placeOrder = async (req, res) => {
 
       if (subtotal < coupon.minimumPurchaseAmount) {
         return res.status(400).json({
-          error: `Minimum purchase amount for this coupon is ${coupon.minimumPurchaseAmount}`,
+          error: `Minimum purchase for coupon is ${coupon.minimumPurchaseAmount}`,
         });
       }
 
-      const userUsage = coupon.usageByUser.find(
-        (usage) => String(usage.userId) === String(userId)
-      );
-      const userUsageCount = userUsage ? userUsage.count : 0;
+      couponDiscount =
+        coupon.couponType === "percentage"
+          ? (subtotal * coupon.couponValue) / 100
+          : coupon.couponValue;
 
-      if (userUsageCount >= coupon.perUserUsageLimit) {
-        return res
-          .status(400)
-          .json({ error: "Coupon usage limit reached for this user" });
-      }
-
-      if (coupon.couponType === "percentage") {
-        couponDiscount = (subtotal * coupon.couponValue) / 100;
-      } else if (coupon.couponType === "flat") {
-        couponDiscount = coupon.couponValue;
-      }
-
-      couponDiscount = Math.min(couponDiscount, subtotal); // Ensure the discount doesn't exceed the subtotal
-
-      // Update the coupon usage
-      if (userUsage) {
-        userUsage.count += 1;
-      } else {
-        coupon.usageByUser.push({ userId, count: 1 });
-      }
-
-      await coupon.save();
+      totalPrice -= couponDiscount;
     }
 
-    // Distribute coupon discount among items based on their weightage
-    const totalItemPrice = orderItems.reduce(
-      (sum, item) => sum + item.itemTotalPrice,
-      0
-    );
-
-    orderItems.forEach((item) => {
-      const itemWeightage = item.itemTotalPrice / totalItemPrice;
-      const couponAmountOfItem = couponDiscount * itemWeightage;
-      item.CouponAmountOfItem = couponAmountOfItem;
-      item.priceAfterCoupon = item.itemTotalPrice - couponAmountOfItem;
-    });
-
-    totalPrice = subtotal - couponDiscount;
-    orderItems.forEach((item) => {
-      item.itemTotalPrice = item.priceAfterCoupon;
-    });
+    // **COD check for orders above 1000**
+    if (paymentMethod === "Cash on Delivery" && totalPrice > 1000) {
+      return res.status(400).json({
+        error: "Cash on Delivery is not allowed for orders greater than ₹1000.",
+      });
+    }
 
     const newOrder = new Order({
       userId,
-      userName: req.session.user.fullName,
       orderItems,
       shippingAddress,
       payment: {
         paymentMethod,
-        paymentStatus: "Pending",
+        paymentStatus: paymentMethod === "Online Payment" ? "Pending" : "Paid",
       },
-      couponCode: appliedCouponCode || null,
-      couponType: coupon ? coupon.couponType : null,
-      couponValue: couponDiscount || null,
       totalPrice,
+      couponCode: appliedCouponCode || null,
+      couponDiscount,
     });
 
     for (const item of cartItems) {
@@ -365,18 +309,16 @@ exports.placeOrder = async (req, res) => {
         message: "Order created successfully",
         order: razorpayOrder,
       });
-    } else {
-      return res.status(200).json({
-        success: true,
-        message: "Order placed successfully!",
-        orderId: newOrder._id,
-      });
     }
+
+    return res.status(200).json({
+      success: true,
+      message: "Order placed successfully!",
+      orderId: newOrder._id,
+    });
   } catch (error) {
     console.error("Error placing order:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while placing the order" });
+    res.status(500).json({ error: "An error occurred while placing the order" });
   }
 };
 
