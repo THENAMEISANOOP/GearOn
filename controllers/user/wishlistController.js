@@ -136,3 +136,6 @@ exports.removeFromWishlist = async (req, res) => {
         res.status(500).send({ error: "Failed to remove item from wishlist." });
     }
 };
+
+
+

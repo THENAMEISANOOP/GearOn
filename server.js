@@ -40,6 +40,10 @@ app.use(
 );
 
 
+const getCartAndWishlistQuantity = require("./middleware/cartAndWishlistIconQtyMiddleware");
+app.use(getCartAndWishlistQuantity);
+
+
 
 // server.js
 app.use((req, res, next) => {
@@ -190,6 +194,8 @@ app.get('/search', (req, res) => {
 
   res.json(filteredProducts);
 });
+
+
 
 
 

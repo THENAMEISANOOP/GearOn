@@ -131,9 +131,7 @@ router.get("/products/searchFilter", ShopAllController.searchAndFilterProducts);
 
 router.get('/search', User.search);
 
-// model tosearch
 
-const bikeController = require("../controllers/user/bikeController");
 
 
 
@@ -144,6 +142,16 @@ const wishlistController = require("../controllers/user/wishlistController");
 router.get("/user/wishlist", userAuthenticated, wishlistController.getWishlist);
 router.post("/wishlist/add",  wishlistController.addToWishlist);
 router.delete('/wishlist/remove/:wishlistId', wishlistController.removeFromWishlist);
+
+
+
+// /--------------------Cart Quantity Badge----------------------------------------- 
+
+const cartQuantityController = require("../controllers/user/cartQuantityController");
+router.get("/cart/totalQuantity", cartQuantityController.getTotalCartQuantity);
+router.get("/wishlist/totalCount", cartQuantityController.getWishlistCount);
+
+
 
 
 // /-------------------- Wallet Dashboard --------------------

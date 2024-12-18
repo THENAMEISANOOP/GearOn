@@ -21,8 +21,14 @@
     <%- include("partials/navBar") %>
 
     <!-- Page Content -->
-    <div class="w-full">
-      <img src="/images/logo2.jpg" alt="Banner Image" class="w-full" />
+    <div class="w-full relative">
+      <video autoplay loop muted class="w-full h-auto">
+        <source src=".mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <h1 class="text-white text-4xl lg:text-6xl font-bold">Welcome to Our Store</h1>
+      </div>
     </div>
 
     <!-- Products Grid -->
@@ -59,15 +65,70 @@
       <% } %>
     </div>
 
-   
-    
-    
-    
-    
-
     <!------------- Footer ------------>
     <%- include("partials/footer") %>
 
-    
+    <script>
+      const notyf = new Notyf({
+        duration: 3000, // Notification duration in milliseconds
+        position: {
+          x: "right",
+          y: "bottom",
+        },
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        updateWishlistBadge();
+      });
+
+      // Function to update the wishlist badge dynamically
+      async function updateWishlistBadge() {
+        try {
+          const response = await axios.get("/wishlist/totalCount"); // Fetch wishlist count
+          if (response.status === 200) {
+            const wishlistCount = response.data.wishlistCount || 0;
+
+            const wishlistBadge = document.getElementById("wishlistBadge");
+            if (wishlistBadge) {
+              wishlistBadge.textContent = wishlistCount; // Set the count
+              wishlistBadge.classList.toggle("hidden", wishlistCount === 0); // Hide if count is 0
+            }
+          }
+        } catch (error) {
+          console.error("Error updating wishlist badge:", error);
+        }
+      }
+
+      async function addToWishlist(productId, variantId) {
+        try {
+          // Make a POST request to add the product to the wishlist
+          const response = await fetch("/wishlist/add", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ productId, variantId }),
+          });
+
+          // Check if the request was successful
+          if (response.ok) {
+            updateWishlistBadge();
+            notyf.success("Product added to wishlist!");
+          } else {
+            // Handle errors from the server
+            const errorData = await response.json();
+            if (errorData.error === "Product is already in your wishlist.") {
+              notyf.success(errorData.error); // Use info for non-critical notifications
+            } else {
+              notyf.error(errorData.error || "Failed to add to wishlist.");
+            }
+          }
+        } catch (error) {
+          // Handle network or unexpected errors
+          console.error("Error adding to wishlist:", error);
+          notyf.error("An error occurred while adding to wishlist.");
+        }
+      }
+    </script>
   </body>
 </html>

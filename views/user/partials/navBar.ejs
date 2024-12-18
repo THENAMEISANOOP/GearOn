@@ -1,76 +1,88 @@
-<header class="bg-black text-white fixed top-0 left-0 w-full z-50">
-    <div class="container mx-auto px-4 py-4 flex items-center justify-between lg:justify-start">
+<header class="bg-gradient-to-r from-gray-900 via-black to-gray-900 text-white fixed top-0 left-0 w-full z-50 shadow-lg">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between lg:justify-start">
         
         <!-- Logo -->
         <div class="flex items-center mr-8">
-            <a href="/"><img src="/images/gearon_logo.png" alt="Logo" class="h-16 w-full"></a>
+            <a href="/"><img src="/images/gearon_logo.png" alt="Logo" class="h-12 w-auto animate-pulse"></a>
         </div>
-        
 
         <!-- Search Box (Hidden on Small Screens) -->
         <div class="relative flex-grow mx-8 hidden lg:block">
             <form action="/search" method="GET">
-              <input 
-                type="text" 
-                name="query" 
-                placeholder="Search for products" 
-                class="pl-10 pr-4 py-2 rounded bg-gray-100 border-none text-black focus:ring-2 focus:ring-yellow-500 w-full" 
-                required
-              >
-              <button type="submit" class="absolute right-2 top-2 text-yellow-500">
-                  <i class="fa fa-search"></i>
-              </button>
+                <input 
+                    type="text" 
+                    name="query" 
+                    placeholder="Search for products" 
+                    class="pl-10 pr-4 py-2 rounded bg-gray-800 border border-gray-700 text-white focus:ring-2 focus:ring-yellow-500 w-full" 
+                    required
+                >
+                <button type="submit" class="absolute right-2 top-2 text-yellow-500 hover:scale-110 transition-transform">
+                    <i class="fa fa-search"></i>
+                </button>
             </form>
-          </div>
-          
+        </div>
 
         <!-- Navigation Links (Hidden on Small Screens) -->
         <nav class="hidden lg:flex items-center space-x-8">
-            <a href="/shopall" class="hover:text-yellow-500">ShopAll</a>
-            <!-- <a href="#" class="hover:text-yellow-500">Category</a> -->
-           
-            
+            <a href="/shopall" class="hover:text-yellow-500 transition-colors duration-200">ShopAll</a>
         </nav>
 
         <!-- User Greeting or Login Option and Cart Icon -->
         <div class="hidden lg:flex items-center space-x-4 ml-8">
             <% if (user) { %>
-                <a href="/user/profile" class="flex items-center space-x-1 text-sm  hover:text-yellow-500">
+                <a href="/user/profile" class="flex items-center space-x-1 text-sm hover:text-yellow-500 transition-colors duration-200">
                     <i class="fa-regular fa-user text-base"></i>
                     <span>Hello, <%= user.fullName.split(" ")[0] %></span>
                 </a>
             <% } else { %>
-                <a href="/user/login" class="flex items-center space-x-1 text-sm hover:text-yellow-500">
+                <a href="/user/login" class="flex items-center space-x-1 text-sm hover:text-yellow-500 transition-colors duration-200">
                     <i class="fa-regular fa-user text-base"></i>
                     <span>Login</span>
                 </a>
             <% } %>
             <div class="flex items-center space-x-4">
-                <a href="/user/wishlist" class="hover:ring-2 hover:ring-yellow-500 text-white">
-                    <i class="fas fa-heart"></i>
-                </a>
+                <a href="/user/wishlist" class="relative hover:text-yellow-500 transition-colors duration-200">
+                    <i class="fa-regular fa-heart text-xl"></i>
+                    <!-- Wishlist Badge -->
+                    <span id="wishlistBadge" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full px-1.5 py-0.5 
+                    <% if (wishlistQuantity > 0) { %> inline <% } else { %> hidden <% } %>">
+                      <%= wishlistQuantity %>
+                    </span>
+                  </a>
             </div>
-            <a href="/shop/cart" class="hover:text-yellow-500">
-                <i class="fa-solid fa-cart-shopping text-lg"></i>
-            </a>
+            <a href="/shop/cart" class="hover:text-yellow-500 relative transition-colors duration-200">
+                <i class="fa-solid fa-cart-shopping"></i>
+      
+                <% if (cartQuantity> 0) { %>
+                  <span id="cartBadge"
+                    class="badge absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1.5 py-0.5 animate-bounce">
+                    <%= cartQuantity %>
+                  </span>
+                  <% } else { %>
+                    <!-- Hidden badge for empty cart -->
+                    <span id="cartBadge"
+                      class="badge absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1.5 py-0.5 hidden">
+                      0
+                    </span>
+                    <% } %>
+              </a>
         </div>
 
         <!-- Mobile Menu Icon -->
-        <button id="menu-button" class="lg:hidden text-white ml-4">
+        <button id="menu-button" class="lg:hidden text-white ml-4 hover:text-yellow-500 transition-colors duration-200">
             <i class="fa fa-bars text-2xl"></i>
         </button>
     </div>
 
     <!-- Mobile Menu (Visible on Small Screens) -->
-    <div id="mobile-menu" class="lg:hidden bg-gray-800 text-white hidden space-y-2 px-4 py-2">
-        <a href="#" class="block hover:bg-gray-700 py-2">Explore</a>
-        
-        <a href="#" class="block hover:bg-gray-700 py-2">Contact Us</a>
+    <div id="mobile-menu" class="lg:hidden bg-gray-900 text-white hidden space-y-2 px-4 py-2">
+        <a href="#" class="block hover:bg-gray-800 py-2 transition-colors duration-200">Explore</a>
+        <a href="#" class="block hover:bg-gray-800 py-2 transition-colors duration-200">Contact Us</a>
     </div>
 
     <!-- Mobile Search Box -->
     <div class="lg:hidden relative mt-4 px-4">
-        <input type="text" placeholder="Search for products" class="pl-10 pr-4 py-2 rounded bg-gray-800 border-none text-white focus:ring-2 focus:ring-yellow-500 w-full">
+        <input type="text" placeholder="Search for products" class="pl-10 pr-4 py-2 rounded bg-gray-800 border border-gray-700 text-white focus:ring-2 focus:ring-yellow-500 w-full">
         <span class="absolute left-2 top-2">
             <i class="fa fa-search text-gray-400"></i>
         </span>
