@@ -96,7 +96,7 @@ exports.getCheckout = async (req, res) => {
     //make expired coupons Status to False
     let Coupons = await Coupon.find();
     today.setHours(0, 0, 0, 0);
-    
+
     Coupons.forEach(async (coupon) => {
       const couponEndDate = new Date(coupon.endDate);
       if (couponEndDate < today) {
@@ -180,6 +180,8 @@ exports.placeOrder = async (req, res) => {
     const activeOffers = await Offer.find({ isActive: true });
 
     let subtotal = 0;
+    let totalOfferValue = 0;
+    let totalPrice = 0;
 
     const orderItems = cartItems.map((item) => {
       const product = item.productId;
@@ -189,8 +191,10 @@ exports.placeOrder = async (req, res) => {
       let applicableOffers = [];
       let bestOffer = { discountPercentage: 0 };
 
+      // Filter applicable and active offers
       applicableOffers = activeOffers.filter(
         (offer) =>
+          offer.isActive && // Check if the offer is active
           offer.offerType === "Product" &&
           String(offer.applicableProduct) === String(product._id)
       );
@@ -198,26 +202,47 @@ exports.placeOrder = async (req, res) => {
       if (product.categoriesId) {
         const categoryOffers = offers.filter(
           (offer) =>
+            offer.isActive && // Check if the offer is active
             offer.offerType === "Category" &&
             String(offer.applicableCategory) === String(product.categoriesId)
         );
         applicableOffers = applicableOffers.concat(categoryOffers);
       }
 
+      // Determine the best offer
       if (applicableOffers.length > 0) {
         bestOffer = applicableOffers.reduce((max, current) =>
           current.discountPercentage > max.discountPercentage ? current : max
         );
       }
 
+      let offerAmount = 0;
       const offerPercentage = bestOffer.discountPercentage || 0;
-      const offerAmount = (discountPrice * offerPercentage) / 100;
+      if (offerPercentage > 0) {
+        offerAmount = (discountPrice * offerPercentage) / 100;
+      }
+
       const priceAfterOffer = discountPrice - offerAmount;
       const itemTotalPrice = priceAfterOffer * item.quantity;
+      const totalPriceWithoutOffer = discountPrice * item.quantity;
 
-      subtotal += itemTotalPrice;
+      subtotal += totalPriceWithoutOffer;
+      totalOfferValue += offerAmount * item.quantity;
+
+      const generateOrderID = () => {
+        const characters =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let orderID = "#";
+        for (let i = 0; i < 5; i++) {
+          orderID += characters.charAt(
+            Math.floor(Math.random() * characters.length)
+          );
+        }
+        return orderID;
+      };
 
       return {
+        order_id: generateOrderID(),
         product: {
           productId: product._id,
           brand: product.brand,
@@ -230,17 +255,26 @@ exports.placeOrder = async (req, res) => {
           discountPrice: variant.discountPrice,
         },
         quantity: item.quantity,
+        orderStatus: "Processing",
+        offerType: bestOffer.offerType || null,
+        offerTitle: bestOffer.title || null,
+        offerPercentage,
+        offerAmount,
         priceAfterOffer,
+        priceWithoutOffer: discountPrice,
         itemTotalPrice,
+        priceWithoutCoupon: itemTotalPrice,
+        CouponAmountOfItem: 0,
+        priceAfterCoupon: itemTotalPrice,
       };
     });
 
-    // Check and apply coupon
-    let couponDiscount = 0;
-    let totalPrice = subtotal;
 
+    // Check and apply the coupon
+    let couponDiscount = 0;
+    let coupon;
     if (appliedCouponCode) {
-      const coupon = await Coupon.findOne({
+      coupon = await Coupon.findOne({
         couponCode: appliedCouponCode,
         isActive: true,
       });
@@ -251,36 +285,77 @@ exports.placeOrder = async (req, res) => {
 
       if (subtotal < coupon.minimumPurchaseAmount) {
         return res.status(400).json({
-          error: `Minimum purchase for coupon is ${coupon.minimumPurchaseAmount}`,
+          error: `Minimum purchase amount for this coupon is ${coupon.minimumPurchaseAmount}`,
         });
       }
 
-      couponDiscount =
-        coupon.couponType === "percentage"
-          ? (subtotal * coupon.couponValue) / 100
-          : coupon.couponValue;
+      const userUsage = coupon.usageByUser.find(
+        (usage) => String(usage.userId) === String(userId)
+      );
+      const userUsageCount = userUsage ? userUsage.count : 0;
 
-      totalPrice -= couponDiscount;
+      if (userUsageCount >= coupon.perUserUsageLimit) {
+        return res
+          .status(400)
+          .json({ error: "Coupon usage limit reached for this user" });
+      }
+
+      if (coupon.couponType === "percentage") {
+        couponDiscount = (subtotal * coupon.couponValue) / 100;
+      } else if (coupon.couponType === "flat") {
+        couponDiscount = coupon.couponValue;
+      }
+
+      couponDiscount = Math.min(couponDiscount, subtotal); // Ensure the discount doesn't exceed the subtotal
+
+      // Update the coupon usage
+      if (userUsage) {
+        userUsage.count += 1;
+      } else {
+        coupon.usageByUser.push({ userId, count: 1 });
+      }
+
+      await coupon.save();
     }
 
-    // **COD check for orders above 1000**
+    // Distribute coupon discount among items based on their weightage
+    const totalItemPrice = orderItems.reduce(
+      (sum, item) => sum + item.itemTotalPrice,
+      0
+    );
+
+    orderItems.forEach((item) => {
+      const itemWeightage = item.itemTotalPrice / totalItemPrice;
+      const couponAmountOfItem = couponDiscount * itemWeightage;
+      item.CouponAmountOfItem = couponAmountOfItem;
+      item.priceAfterCoupon = item.itemTotalPrice - couponAmountOfItem;
+      item.itemTotalPrice = item.priceAfterCoupon;
+    });
+
+    totalPrice = subtotal - couponDiscount;
+
+    // Above 1000 is Online payment
     if (paymentMethod === "Cash on Delivery" && totalPrice > 1000) {
-      return res.status(400).json({
-        error: "Cash on Delivery is not allowed for orders greater than ₹1000.",
-      });
+      return res
+        .status(400)
+        .json({ error: "Use Online Payment For orders Above 1000" });
     }
 
     const newOrder = new Order({
       userId,
+      userName: req.session.user.fullName,
       orderItems,
       shippingAddress,
       payment: {
         paymentMethod,
-        paymentStatus: paymentMethod === "Online Payment" ? "Pending" : "Paid",
+        paymentStatus: "Pending",
       },
-      totalPrice,
       couponCode: appliedCouponCode || null,
-      couponDiscount,
+      couponType: coupon ? coupon.couponType : null,
+      totalCouponValue: couponDiscount || 0, // Save total coupon value
+      totalOfferValue, // Save total offer value
+      Subtotal: subtotal, // Save order subtotal
+      totalPrice,
     });
 
     for (const item of cartItems) {
@@ -308,22 +383,22 @@ exports.placeOrder = async (req, res) => {
         success: true,
         message: "Order created successfully",
         order: razorpayOrder,
+        orderId: newOrder._id,
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: "Order placed successfully!",
+        orderId: newOrder._id,
       });
     }
-
-    return res.status(200).json({
-      success: true,
-      message: "Order placed successfully!",
-      orderId: newOrder._id,
-    });
   } catch (error) {
     console.error("Error placing order:", error);
-    res.status(500).json({ error: "An error occurred while placing the order" });
+    res
+      .status(500)
+      .json({ error: "An error occurred while placing the order" });
   }
 };
-
-
-
 
 exports.verifyPayment = async (req, res) => {
   try {
@@ -333,51 +408,117 @@ exports.verifyPayment = async (req, res) => {
     const digest = shasum.digest("hex");
 
     if (digest === paymentResponse.razorpay_signature) {
-      const updatedOrder = await Order.findOneAndUpdate(
-        { _id: order.receipt },
-        {
-          $set: {
-            "payment.paymentStatus": "Paid",
-            "payment.razorpayOrderId": order.id,
-            "payment.razorpayPaymentId": paymentResponse.razorpay_payment_id,
-          },
-        },
-        { new: true }
-      );
-
-      if (!updatedOrder) {
+      // Fetch the order first
+      const existingOrder = await Order.findById(order.receipt);
+      if (!existingOrder) {
         console.error("Order not found for Razorpay order ID:", order.id);
         return res
           .status(404)
           .json({ success: false, message: "Order not found" });
       }
 
+      // Update only items that are not already cancelled
+      existingOrder.orderItems.forEach((item) => {
+        if (item.orderStatus !== "Cancelled") {
+          item.orderStatus = "Processing";
+        }
+      });
+
+      // Update payment details
+      existingOrder.payment.paymentStatus = "Paid";
+      existingOrder.payment.razorpayOrderId = order.id;
+      existingOrder.payment.razorpayPaymentId =
+        paymentResponse.razorpay_payment_id;
+
+      // Save the updated order
+      await existingOrder.save();
+
       return res.status(200).json({
         success: true,
         message: "Payment verified successfully",
       });
     } else {
+      // Invalid signature, mark payment as pending
       await Order.findOneAndUpdate(
         { _id: order.receipt },
         { $set: { "payment.paymentStatus": "Pending" } },
         { new: true }
       );
+
       return res
         .status(400)
         .json({ success: false, message: "Invalid signature" });
     }
   } catch (error) {
     console.error("Payment verification error: ", error);
+
+    // In case of error, mark payment as pending
     await Order.findOneAndUpdate(
       { _id: order.receipt },
       { $set: { "payment.paymentStatus": "Pending" } },
       { new: true }
     );
+
     return res
       .status(500)
       .json({ success: false, message: "Payment verification failed" });
   }
 };
+
+
+
+exports.retryPayment = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+
+    // Fetch the order from the database
+    const existingOrder = await Order.findById(orderId);
+    if (!existingOrder) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found." });
+    }
+
+    if (
+      existingOrder.payment.paymentStatus !== "Pending" ||
+      existingOrder.payment.paymentMethod !== "Online Payment"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Retry payment is only applicable for pending online payments.",
+      });
+    }
+
+    // Ensure the total price is converted to an integer (paise) for Razorpay
+    const amountInPaise = Math.round(existingOrder.totalPrice * 100);
+
+    // Create a new Razorpay order
+    const razorpayOrder = await razorpay.orders.create({
+      amount: amountInPaise, // Convert to paise and ensure it's an integer
+      currency: "INR",
+      receipt: existingOrder._id.toString(),
+    });
+
+    // Update the existing order with the new Razorpay order details
+    existingOrder.payment.razorpayOrderId = razorpayOrder.id;
+    existingOrder.payment.paymentStatus = "Pending"; // Keep it pending until verified
+    await existingOrder.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Retry payment initiated successfully.",
+      order: razorpayOrder,
+    });
+  } catch (error) {
+    console.error("Error initiating retry payment:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while retrying the payment.",
+    });
+  }
+};
+
 
 
 module.exports = exports;
