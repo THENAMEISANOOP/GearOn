@@ -95,4 +95,10 @@ router.get("/sales-report/pdf", adminSalesReport.downloadPDF);
 router.get("/sales-report/excel", adminSalesReport.downloadExcel);
 
 
+
+router.get("/dashboard", adminAuthenticated, adminController.getDashboard);
+router.get("/dashboard/data", adminAuthenticated, adminController.getDashboardData);
+// router.get("/dashboard/chart-data", adminAuthenticated, adminController.getChartData);
+
+
 module.exports = router;

@@ -24,7 +24,7 @@ exports.getAdminOrders = [
 
       orders.forEach((order) => {
         if (order.orderItems.length > 0) {
-          order.computedOrderStatus = order.orderItems[0].orderStatus; 
+          order.computedOrderStatus = order.orderItems[0].orderStatus;
         } else {
           order.computedOrderStatus = "No Items";
         }
@@ -48,7 +48,7 @@ exports.getAdminOrders = [
 
 
 exports.getAdminOrdersDetails = [
-  adminAuthenticated,  
+  adminAuthenticated,
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -65,9 +65,12 @@ exports.getAdminOrdersDetails = [
         _id: order._id,
         userName: order.userName,
         orderDate: order.createdAt,
-        couponValue: order.couponValue,
+        Subtotal: order.Subtotal,
+        totalOfferValue: order.totalOfferValue,
+        totalCouponValue: order.totalCouponValue,
         totalPrice: order.totalPrice,
-        paymentMethod: order.paymentMethod,
+        paymentMethod: order.payment.paymentMethod,
+        paymentStatus: order.payment.paymentStatus,
         shippingAddress: order.shippingAddress,
         items: order.orderItems,
       };
@@ -95,7 +98,7 @@ exports.updateOrderStatus = [
       if (!item) return res.status(404).json({ error: "Item not found" });
 
       // Increase stock if order is Cancelled or Returned
-      if (orderStatus === "Cancelled" || orderStatus === "Returned") {
+      if (orderStatus === "Cancelled") {
         const variant = await Variant.findById(item.variant.variantId);
         if (!variant) {
           return res
@@ -103,7 +106,42 @@ exports.updateOrderStatus = [
             .json({ error: "Associated variant not found" });
         }
         variant.stock += item.quantity;
+        if (order.payment.paymentStatus === "Paid") {
+          let wallet = await Wallet.findOne({ userId: order.userId });
+          if (!wallet) {
+            wallet = new Wallet({
+              userId: order.userId,
+              balance_amount: 0,
+              transactions: [],
+            });
+          }
+
+          // Refund amount
+          const refundAmount = item.itemTotalPrice;
+
+          // Update wallet balance and add a transaction
+          wallet.balance_amount += refundAmount;
+          wallet.transactions.push({
+            transactionType: "CREDIT",
+            amount: refundAmount,
+            transactionDate: new Date(),
+          });
+
+          await wallet.save();
+          order.payment.paymentStatus = "Refund Processed for Returned/Cancelled Orders";
+        }
         await variant.save();
+
+        order.totalPrice -= item.itemTotalPrice;
+
+      }
+
+      if (orderStatus === "Processing") {
+        order.payment.paymentStatus = "Retry Payment Successful";
+      }
+
+      if (orderStatus === "Delivered") {
+        order.payment.paymentStatus = "Paid";
       }
 
       item.orderStatus = orderStatus;
@@ -138,7 +176,7 @@ exports.handleReturnRequest = async (req, res) => {
 
     if (action === "approve") {
       orderItem.orderStatus = "Returned";
-
+      order.payment.paymentStatus = "Refund Processed for Returned/Cancelled Orders";
       // Check if wallet exists, create if not
       let wallet = await Wallet.findOne({ userId: order.userId });
       if (!wallet) {

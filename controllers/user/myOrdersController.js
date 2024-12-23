@@ -3,6 +3,7 @@ const Category = require("../../models/categoryModel");
 const Variant = require("../../models/variantSchema");
 const mongoose = require("mongoose");
 const Cart = require("../../models/cartModel");
+const Wallet = require("../../models/walletModel");
 
 
 const Order = require("../../models/orderModel");
@@ -15,12 +16,36 @@ exports.getMyOrders = async (req, res) => {
     const limit = 5;
     const skip = (page - 1) * limit;
 
+    // Get total order count for pagination
     const totalOrders = await Order.countDocuments({ userId });
-    const userOrders = await Order.find({ userId })
+
+    // Fetch user orders
+    let userOrders = await Order.find({ userId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
+    // Update order status conditionally
+    for (let order of userOrders) {
+      if (
+        order.payment.paymentMethod === "Online Payment" &&
+        order.payment.paymentStatus === "Pending"
+        && order.orderItems.some((item) => item.orderStatus === "Processing")
+      ) {
+        // Update individual item statuses
+        order.orderItems.forEach((item) => {
+          item.orderStatus = "Payment Pending";
+        });
+        // Save the updated order
+        await order.save();
+      }
+    }
+
+    userOrders = await Order.find({ userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    // Format orders for rendering
     const ordersWithDetails = userOrders.map((order) => ({
       _id: order._id,
       orderDate: new Date(order.createdAt).toLocaleString("en-US", {
@@ -45,6 +70,7 @@ exports.getMyOrders = async (req, res) => {
       })),
     }));
 
+    // Render the user orders page
     res.render("user/userMyOrders", {
       orders: ordersWithDetails,
       currentPage: page,
@@ -62,10 +88,24 @@ exports.getMyOrders = async (req, res) => {
 
 exports.getOrderDetails = async (req, res) => {
   try {
-    const orderId = req.params.id; 
-    const userId = req.session.user._id; 
+    const orderId = req.params.id;
+    const userId = req.session.user._id;
 
-    const order = await Order.findOne({ _id: orderId, userId });
+    let order = await Order.findOne({ _id: orderId, userId });
+      if (
+        order.payment.paymentMethod === "Online Payment" &&
+        order.payment.paymentStatus === "Pending" &&
+        order.orderItems.some((item) => item.orderStatus === "Processing")
+      ) {
+        // Update individual item statuses
+        order.orderItems.forEach((item) => {
+          item.orderStatus = "Payment Pending";
+        });
+        // Save the updated order
+        await order.save();
+      }
+    
+    order = await Order.findOne({ _id: orderId, userId });
 
     if (!order) {
       return res.status(404).send("Order not found.");
@@ -81,7 +121,9 @@ exports.getOrderDetails = async (req, res) => {
         minute: "2-digit",
         hour12: true,
       }),
-      couponValue : order.couponValue,
+      Subtotal: order.Subtotal,
+      totalOfferValue: order.totalOfferValue,
+      totalCouponValue: order.totalCouponValue,
       totalPrice: order.totalPrice,
       paymentMethod: order.payment.paymentMethod,
       paymentStatus: order.payment.paymentStatus,
@@ -154,8 +196,46 @@ exports.cancelOrderItem = async (req, res) => {
       });
     }
 
+    if (order.payment.paymentStatus === "Paid") {
+      let wallet = await Wallet.findOne({ userId: order.userId });
+      if (!wallet) {
+        wallet = new Wallet({
+          userId: order.userId,
+          balance_amount: 0,
+          transactions: [],
+        });
+      }
+
+      // Refund amount (adjusting based on coupon and offer amounts)
+      const refundAmount = orderItem.priceAfterCoupon;
+
+      // Update wallet balance and add a transaction
+      wallet.balance_amount += refundAmount;
+      wallet.transactions.push({
+        transactionType: "CREDIT",
+        amount: refundAmount,
+        transactionDate: new Date(),
+      });
+
+      await wallet.save();
+      order.payment.paymentStatus =
+        "Refund Processed for Returned/Cancelled Orders";
+    }
+
+    // Adjust order-level totals
+    const itemTotalPrice = orderItem.itemTotalPrice;
+    const offerAmount = orderItem.offerAmount || 0;
+    const couponAmount = orderItem.CouponAmountOfItem || 0;
+    const priceWithoutOffer = orderItem.priceWithoutOffer;
+
+    order.Subtotal -= priceWithoutOffer; 
+    order.totalPrice -= itemTotalPrice;
+    order.totalOfferValue -= offerAmount;
+    order.totalCouponValue -= couponAmount;
+
     orderItem.orderStatus = "Cancelled";
 
+    // Adjust the inventory stock
     const variant = await Variant.findById(orderItem.variant.variantId);
     if (!variant) {
       return res
@@ -163,17 +243,28 @@ exports.cancelOrderItem = async (req, res) => {
         .json({ message: "Associated variant not found in inventory." });
     }
 
-    variant.stock += orderItem.quantity; 
+    variant.stock += orderItem.quantity;
     await variant.save();
 
     await order.save();
 
-    res.status(200).json({ message: "Order item canceled successfully." });
+    res.status(200).json({
+      message: "Order item canceled successfully.",
+      updatedOrder: {
+        totalPrice: order.totalPrice,
+        totalOfferAmount: order.totalOfferAmount,
+        totalCouponAmount: order.totalCouponAmount,
+      },
+    });
   } catch (error) {
     console.error("Error canceling order item:", error);
     res.status(500).json({ message: "Internal Server Error." });
   }
 };
+
+
+
+
 
 
 exports.submitReturnRequest = async (req, res) => {
@@ -267,5 +358,112 @@ exports.cancelReturnRequest = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to cancel return request." });
+  }
+};
+
+
+
+
+const PDFDocument = require("pdfkit");
+
+exports.generateInvoice = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    // Fetch the order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Filter out cancelled items
+    const validOrderItems = order.orderItems.filter(
+      (item) => item.orderStatus !== "Cancelled"
+    );
+
+    if (validOrderItems.length === 0) {
+      return res.status(400).json({
+        message: "No valid items to generate an invoice for this order.",
+      });
+    }
+
+    // Prepare the filename
+    const filename = `invoice-${orderId}.pdf`;
+
+    // Set response headers
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    // Create a PDF document
+    const doc = new PDFDocument();
+    doc.pipe(res);
+
+    // Title
+    doc.fontSize(18).text("Order Invoice", { align: "center" });
+    doc.moveDown();
+
+    // Order details
+    doc.fontSize(12).text(`Order ID: ${order._id}`);
+    doc.text(`Order Date: ${new Date(order.createdAt).toLocaleString()}`);
+    doc.text(`Customer Name: ${order.userName}`);
+    doc.moveDown();
+
+    // Shipping Address
+    doc.fontSize(14).text("Shipping Address:", { underline: true });
+    const {
+      Name,
+      HouseName,
+      LocalityStreet,
+      TownCity,
+      state,
+      country,
+      pincode,
+      MobileNumber,
+    } = order.shippingAddress;
+    doc.fontSize(12).text(`Name: ${Name}`);
+    doc.text(`House: ${HouseName}`);
+    doc.text(`Street: ${LocalityStreet}`);
+    doc.text(`City: ${TownCity}`);
+    doc.text(`State: ${state}`);
+    doc.text(`Country: ${country}`);
+    doc.text(`Pincode: ${pincode}`);
+    doc.text(`Mobile: ${MobileNumber}`);
+    doc.moveDown();
+
+    // Order Items
+    doc.fontSize(14).text("Order Items:", { underline: true });
+    validOrderItems.forEach((item, index) => {
+      const { productName, brand } = item.product;
+      const { color, discountPrice } = item.variant;
+      doc
+        .fontSize(12)
+        .text(
+          `${
+            index + 1
+          }. ${brand} ${productName} (Color: ${color}) - ₹${discountPrice.toFixed(
+            2
+          )} x ${item.quantity} = ₹${(item.itemTotalPrice || 0).toFixed(2)}`
+        );
+    });
+    doc.moveDown();
+
+    // Payment Summary
+    doc.fontSize(14).text("Payment Summary:", { underline: true });
+    doc.fontSize(12).text(`Subtotal: ₹${order.Subtotal.toFixed(2)}`);
+    doc.text(`Offer Discounts: ₹${order.totalOfferValue.toFixed(2)}`);
+    doc.text(`Coupon Discounts: ₹${order.totalCouponValue.toFixed(2)}`);
+    doc.text(`Total Price: ₹${order.totalPrice.toFixed(2)}`);
+    doc.text(`Payment Method: ${order.payment.paymentMethod}`);
+    doc.text(`Payment Status: ${order.payment.paymentStatus}`);
+    doc.moveDown();
+
+    // Thank You Message
+    doc.fontSize(16).text("Thank you for your order!", { align: "center" });
+
+    // Finalize PDF
+    doc.end();
+  } catch (error) {
+    console.error("Error generating invoice:", error);
+    res.status(500).json({ message: "Failed to generate invoice" });
   }
 };

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6 mt-10">
+        <!-- Invoice Header -->
+        <div class="text-center border-b border-gray-300 pb-4 mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Invoice</h1>
+            <p class="text-gray-600">Order ID: <span class="font-medium"><%= order._id || "N/A" %></span></p>
+            <p class="text-gray-600">Date: <span class="font-medium"><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A" %></span></p>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold text-gray-800">Shipping Address</h2>
+            <% if (order.shippingAddress) { %>
+            <p class="text-gray-700 mt-2">
+                <%= order.shippingAddress.Name || "N/A" %><br>
+                <%= order.shippingAddress.HouseName || "" %>, <%= order.shippingAddress.LocalityStreet || "" %><br>
+                <%= order.shippingAddress.TownCity || "" %>, <%= order.shippingAddress.state || "" %>, <%= order.shippingAddress.country || "" %><br>
+                <%= order.shippingAddress.pincode || "" %><br>
+                Phone: <%= order.shippingAddress.MobileNumber || "N/A" %>
+            </p>
+            <% } else { %>
+            <p class="text-gray-700">No shipping address available.</p>
+            <% } %>
+        </div>
+
+        <!-- Order Items -->
+        <div class="mb-6 overflow-auto">
+            <h2 class="text-lg font-semibold text-gray-800">Order Items</h2>
+            <table class="w-full border-collapse border border-gray-300 mt-4">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-700">
+                        <th class="border border-gray-300 px-4 py-2 text-left">Product</th>
+                        <th class="border border-gray-300 px-4 py-2 text-right">Quantity</th>
+                        <th class="border border-gray-300 px-4 py-2 text-right">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% order.orderItems.forEach(item => { %>
+                    <tr class="text-gray-700">
+                        <td class="border border-gray-300 px-4 py-2">
+                            <%= item.product?.productName || "N/A" %>
+                            <% if (item.offerTitle) { %>
+                            <p class="text-sm text-gray-500">Offer: <%= item.offerTitle %> (<%= item.offerPercentage %>% off)</p>
+                            <% } %>
+                        </td>
+                        <td class="border border-gray-300 px-4 py-2 text-right"><%= item.quantity || 0 %></td>
+                        <td class="border border-gray-300 px-4 py-2 text-right">₹<%= (item.itemTotalPrice || 0).toFixed(2) %></td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Payment Details -->
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold text-gray-800">Payment Details</h2>
+            <p class="text-gray-700 mt-2">Method: <%= order.payment?.paymentMethod || "N/A" %></p>
+            <p class="text-gray-700">Status: <%= order.payment?.paymentStatus || "N/A" %></p>
+            <% if (order.payment?.razorpayPaymentId) { %>
+            <p class="text-gray-700">Transaction ID: <%= order.payment.razorpayPaymentId %></p>
+            <% } %>
+        </div>
+
+        <!-- Total Summary -->
+        <div class="text-right border-t border-gray-300 pt-4">
+            <% if (order.couponCode) { %>
+            <p class="text-gray-700">Coupon Code: <span class="font-medium"><%= order.couponCode %></span></p>
+            <p class="text-gray-700">Discount: ₹<%= (order.couponValue || 0).toFixed(2) %></p>
+            <% } %>
+            <p class="text-xl font-semibold text-gray-800">Total: ₹<%= (order.totalPrice || 0).toFixed(2) %></p>
+        </div>
+
+        <!-- Thank You Note -->
+        <div class="text-center mt-6">
+            <p class="text-gray-600">Thank you for your purchase!</p>
+        </div>
+    </div>
+</body>
+</html>
