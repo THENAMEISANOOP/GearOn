@@ -123,15 +123,13 @@ exports.getDashboardData = async (req, res) => {
       },
       { $sort: { _id: 1 } },
     ]);
-
-    // Generate all possible intervals between the first sale and today
     const results = [];
     const dateIntervals = [];
     let current = new Date(startDate);
-
+    
     while (current <= now) {
       let dateLabel;
-
+    
       if (filter === "yearly") {
         dateLabel = `${current.getFullYear()}`;
         current.setFullYear(current.getFullYear() + 1);
@@ -140,25 +138,36 @@ exports.getDashboardData = async (req, res) => {
           .toString()
           .padStart(2, "0")}`;
         current.setMonth(current.getMonth() + 1);
-      } else {
+      } else if (filter === "weekly") {
+        // Get the start of the week (adjust for the desired start day, like Monday)
+        const startOfWeek = current.getDate() - current.getDay(); // Set to the most recent Sunday (or Monday)
+        current.setDate(startOfWeek);
+        
+        // Format the date as YYYY-MM-DD
         dateLabel = current.toISOString().split("T")[0];
-        current.setDate(current.getDate() + (filter === "weekly" ? 7 : 1));
+        current.setDate(current.getDate() + 7); // Move to the next week
+      } else {
+        dateLabel = current.toISOString().split("T")[0]; // For daily intervals
+        current.setDate(current.getDate() + 1); // Move to the next day
       }
-
+    
       dateIntervals.push(dateLabel);
     }
-
+    
     const salesMap = Object.fromEntries(
       salesDataRaw.map((d) => [d._id, d.totalSales])
     );
-
+    
+    console.log('salesMap:', salesMap);
+    
     dateIntervals.forEach((interval) => {
       results.push({
         date: interval,
         totalSales: salesMap[interval] || 0,
       });
+      console.log('Interval:', interval, 'Sales:', salesMap[interval] || 0);
     });
-
+    
     // Aggregate top 10 products
     const topProducts = await Order.aggregate([
       { $unwind: "$orderItems" },
@@ -240,6 +249,10 @@ exports.getDashboardData = async (req, res) => {
       { $limit: 10 },
     ]);
 
+    console.log(888888885);
+    console.log(filter);
+    console.log(results);
+    console.log('oooooooooooooooooooooooooooooooooo44');
     res.json({
       salesData: results,
       topProducts,

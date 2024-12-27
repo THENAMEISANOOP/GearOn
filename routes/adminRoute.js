@@ -6,10 +6,10 @@ const checkSession = require("../middleware/checkSession");
 const adminAuthenticated = require("../middleware/adminauthmildware");
 const checkUserStatus = require("../middleware/checkUserStatus");
 
-// router.use((req, res, next) => {
-//     req.session.admin = true;
-//     next();
-// });
+router.use((req, res, next) => {
+    req.session.admin = true;
+    next();
+});
 
 // Admin login page
 router.get("/login", checkSession, adminController.getLogin);
