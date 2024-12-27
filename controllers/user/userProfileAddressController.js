@@ -85,11 +85,11 @@ exports.getUserAddresses = async (req, res) => {
     // Get userId from session
     const userId = req.session.user._id;
 
-    // console.log("userId is " + userId);
+    
     // Fetch addresses for the user
     const addresses = await Address.find({ userId }).sort({ createdAt: -1 });
 
-    // console.log("addresses are " + addresses);
+    
     // Render address page with data
     res.render("user/address", {
       addresses,
@@ -111,7 +111,7 @@ exports.getUserAddresses = async (req, res) => {
 // -----------Add New Address-------------------------
 exports.addAddress = async (req, res) => {
   try {
-    // console.log(22222);
+    
     const userId = req.session.user._id;
 
     const requiredFields = [
@@ -179,7 +179,7 @@ exports.deleteAddress = async (req, res) => {
     const { id } = req.params;
     const result = await Address.findByIdAndDelete(id);
 
-    // console.log("the result is " + result);
+   
     if (result) {
       res.status(200).json({ message: "Address deleted successfully" });
     } else {

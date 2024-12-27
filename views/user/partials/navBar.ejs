@@ -1,4 +1,4 @@
-<header class="bg-gradient-to-r from-gray-900 via-black to-gray-900 text-white fixed top-0 left-0 w-full z-50 shadow-lg">
+<header class="bg-black text-white fixed top-0 left-0 w-full z-50 shadow-lg">
     <div class="container mx-auto px-4 py-3 flex items-center justify-between lg:justify-start">
         
         <!-- Logo -->
@@ -6,8 +6,8 @@
             <a href="/"><img src="/images/gearon_logo.png" alt="Logo" class="h-12 w-auto animate-pulse"></a>
         </div>
 
-        <!-- Search Box (Hidden on Small Screens) -->
-        <div class="relative flex-grow mx-8 hidden lg:block">
+        <!-- Hidden Search Box -->
+        <div class="relative flex-grow mx-8 hidden lg:block invisible">
             <form action="/search" method="GET">
                 <input 
                     type="text" 
@@ -75,7 +75,7 @@
     </div>
 
     <!-- Mobile Menu (Visible on Small Screens) -->
-    <div id="mobile-menu" class="lg:hidden bg-gray-900 text-white hidden space-y-2 px-4 py-2">
+    <div id="mobile-menu" class="lg:hidden bg-black text-white hidden space-y-2 px-4 py-2">
         <a href="#" class="block hover:bg-gray-800 py-2 transition-colors duration-200">Explore</a>
         <a href="#" class="block hover:bg-gray-800 py-2 transition-colors duration-200">Contact Us</a>
     </div>

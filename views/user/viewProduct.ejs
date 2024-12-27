@@ -332,6 +332,30 @@
       });
 
 
+      document.addEventListener("DOMContentLoaded", () => {
+        updateWishlistBadge();
+
+      });
+
+      // Function to update the wishlist badge dynamically
+      async function updateWishlistBadge() {
+        try {
+          const response = await axios.get("/wishlist/totalCount"); // Fetch wishlist count
+          if (response.status === 200) {
+            const wishlistCount = response.data.wishlistCount || 0;
+
+            const wishlistBadge = document.getElementById("wishlistBadge");
+            if (wishlistBadge) {
+              wishlistBadge.textContent = wishlistCount; // Set the count
+              wishlistBadge.classList.toggle("hidden", wishlistCount === 0); // Hide if count is 0
+            }
+          }
+        } catch (error) {
+          console.error("Error updating wishlist badge:", error);
+        }
+      }
+
+
       async function addToWishlist(productId, variantId) {
         try {
           // Make a POST request to add the product to the wishlist
@@ -345,6 +369,7 @@
 
           // Check if the request was successful
           if (response.ok) {
+            updateWishlistBadge();
             notyf.success("Product added to wishlist!");
           } else {
             // Handle errors from the server
@@ -498,37 +523,62 @@
           );
       });
       // Frontend JavaScript
-      document
-        .getElementById("addToCartButton")
-        .addEventListener("click", function () {
-          const productId = "<%= product._id %>"; // Pass dynamically from server
-          const variantId = document.getElementById("color").value; // Selected variant ID
-          const quantity = 1; // Default quantity for now, can add quantity selection
+      document.getElementById("addToCartButton").addEventListener("click", function () {
+        const productId = "<%= product._id %>"; // Pass dynamically from server
+        const variantId = document.getElementById("color").value; // Selected variant ID
+        const quantity = 1; // Default quantity for now
 
-          fetch("/cart/add", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              productId,
-              variantId,
-              quantity,
-            }),
-          })
-            .then(response => response.json().then(data => ({ status: response.status, body: data })))
-            .then(({ status, body }) => {
-              if (status === 200) {
-                notyf.success(body.message);
+        fetch("/cart/add", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            productId,
+            variantId,
+            quantity,
+          }),
+        })
+          .then(response => response.json().then(data => ({ status: response.status, body: data })))
+          .then(({ status, body }) => {
+            if (status === 200) {
+              const cartBadge = document.getElementById("cartBadge");
+              if (cartBadge) {
+                cartBadge.textContent = body.cartQuantity;
+                if (body.cartQuantity > 0) {
+                  cartBadge.classList.remove("hidden");
+                }
               } else {
-                throw new Error(body.message || "Failed to add to cart.");
+                // Create cart badge if it doesn't exist
+                const newCartBadge = document.createElement("span");
+                newCartBadge.id = "cartBadge";
+                newCartBadge.classList.add(
+                  "absolute",
+                  "-top-2",
+                  "-right-2",
+                  "bg-red-600",
+                  "text-white",
+                  "text-xs",
+                  "font-bold",
+                  "rounded-full",
+                  "px-1.5",
+                  "py-0.5"
+                );
+                newCartBadge.textContent = body.cartQuantity;
+                document.querySelector(".fa-cart-shopping").parentNode.appendChild(newCartBadge);
               }
-            })
-            .catch(error => {
-              console.error("Error adding to cart:", error.message);
-              notyf.error(error.message);
-            });
-        });
+              notyf.success(body.message);
+            } else {
+              throw new Error(body.message || "Failed to add to cart.");
+            }
+          })
+          .catch(error => {
+            console.error("Error adding to cart:", error.message);
+            notyf.error(error.message);
+          });
+      });
+
+
 
       // Helper function to update cart count
       async function updateCartCount() {

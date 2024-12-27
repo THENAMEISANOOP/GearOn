@@ -158,14 +158,14 @@ exports.getDashboardData = async (req, res) => {
       salesDataRaw.map((d) => [d._id, d.totalSales])
     );
     
-    console.log('salesMap:', salesMap);
+    // console.log('salesMap:', salesMap);
     
     dateIntervals.forEach((interval) => {
       results.push({
         date: interval,
         totalSales: salesMap[interval] || 0,
       });
-      console.log('Interval:', interval, 'Sales:', salesMap[interval] || 0);
+      // console.log('Interval:', interval, 'Sales:', salesMap[interval] || 0);
     });
     
     // Aggregate top 10 products
@@ -249,10 +249,7 @@ exports.getDashboardData = async (req, res) => {
       { $limit: 10 },
     ]);
 
-    console.log(888888885);
-    console.log(filter);
-    console.log(results);
-    console.log('oooooooooooooooooooooooooooooooooo44');
+   
     res.json({
       salesData: results,
       topProducts,
