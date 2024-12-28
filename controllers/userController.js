@@ -8,7 +8,7 @@ exports.loginGET = (req, res) => {
   if (req.session.user) {
     return res.redirect("/user/profile");
   }
-  res.render("user/userLogin");
+  res.render("user/userlogin");
 };
 
 exports.loginPOST = async (req, res) => {
@@ -17,14 +17,14 @@ exports.loginPOST = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.render("user/userLogin", {
+      return res.render("user/userlogin", {
         error: "User not registered",
         email,
       });
     }
 
     if (user.status === "blocked") {
-      return res.render("user/userLogin", {
+      return res.render("user/userlogin", {
         error: `${email} is blocked`,
         email,
       });
@@ -32,7 +32,7 @@ exports.loginPOST = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.render("user/userLogin", {
+      return res.render("user/userlogin", {
         error: "Wrong Email or Password",
         email,
       });
