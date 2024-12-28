@@ -24,6 +24,7 @@ router.post("/customers/unblock/:id", adminController.unblockCustomer);
 router.post("/customers/block/:id",adminController.blockCustomer);
 router.post("/customers/updateStatus/:id", adminController.updateStatus);
 
+
 router.get("/category", adminController.getCategories);
 router.post("/category/add", adminController.addCategory);
 router.post("/category/update/:id", adminController.updateCategory);
