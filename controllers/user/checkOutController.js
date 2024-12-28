@@ -3,6 +3,7 @@ const Cart = require("../../models/cartModel");
 const Order = require("../../models/orderModel");
 const ProductVariant = require("../../models/variantSchema");
 const Offer = require("../../models/offerModel");
+const Wallet = require("../../models/walletModel");
 const { ObjectId } = require("mongoose").Types;
 const Coupon = require("../../models/couponModel");
 const mongoose = require("mongoose");
@@ -137,14 +138,29 @@ exports.getCheckout = async (req, res) => {
         validCoupons.push(coupon);
       }
     }
-    console.log(
-      "subtotal " + subtotal + " totalDiscount ",
-      +totalDiscount + " totalAfterDiscount ",
-      totalAfterDiscount
-    );
+
+
+    //Wallet
+    let wallet = await Wallet.findOne({ userId }).lean();
+
+    if (!wallet) {
+      wallet = await Wallet.create({
+        userId,
+        balance_amount: 0,
+        transactions: [],
+      });
+    }
+
+    //console.log(wallet.balance_amount);
+    // console.log(
+    //   "subtotal " + subtotal + " totalDiscount ",
+    //   +totalDiscount + " totalAfterDiscount ",
+    //   totalAfterDiscount
+    // );
     res.render("user/checkOutpage", {
       userAddresses,
       cartItems: formattedCartItems,
+      walletBalance: wallet.balance_amount,
       subtotal,
       totalDiscount,
       totalAfterDiscount,
@@ -197,93 +213,93 @@ exports.placeOrder = async (req, res) => {
     let totalOfferValue = 0;
     let totalPrice = 0;
 
-const orderItems = cartItems.map((item) => {
-  const product = item.productId;
-  const variant = item.variantId;
-  const discountPrice = item.variantId.discountPrice; // Single unit base price
+    const orderItems = cartItems.map((item) => {
+      const product = item.productId;
+      const variant = item.variantId;
+      const discountPrice = item.variantId.discountPrice; // Single unit base price
 
-  let applicableOffers = [];
-  let bestOffer = { discountPercentage: 0 };
+      let applicableOffers = [];
+      let bestOffer = { discountPercentage: 0 };
 
-  // Filter applicable and active offers
-  applicableOffers = activeOffers.filter(
-    (offer) =>
-      offer.isActive && // Check if the offer is active
-      offer.offerType === "Product" &&
-      String(offer.applicableProduct) === String(product._id)
-  );
-
-  if (product.categoriesId) {
-    const categoryOffers = offers.filter(
-      (offer) =>
-        offer.isActive && // Check if the offer is active
-        offer.offerType === "Category" &&
-        String(offer.applicableCategory) === String(product.categoriesId)
-    );
-    applicableOffers = applicableOffers.concat(categoryOffers);
-  }
-
-  // Determine the best offer
-  if (applicableOffers.length > 0) {
-    bestOffer = applicableOffers.reduce((max, current) =>
-      current.discountPercentage > max.discountPercentage ? current : max
-    );
-  }
-
-  // Calculate totals based on the quantity
-  const offerPercentage = bestOffer.discountPercentage || 0;
-  const offerAmount = ((discountPrice * offerPercentage) / 100) * item.quantity; // Total offer amount
-  const priceAfterOffer =
-    (discountPrice - (discountPrice * offerPercentage) / 100) * item.quantity; // Total price after offer
-  const priceWithoutOffer = discountPrice * item.quantity; // Total price without offer
-  const itemTotalPrice = priceAfterOffer; // Total price after offer
-  const CouponAmountOfItem = 0; // Initialize as 0
-  const priceAfterCoupon = itemTotalPrice - CouponAmountOfItem; // Price after coupon
-
-  // Update running totals
-  subtotal += priceWithoutOffer;
-  totalOfferValue += offerAmount;
-
-  // Generate a unique order ID
-  const generateOrderID = () => {
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let orderID = "#";
-    for (let i = 0; i < 5; i++) {
-      orderID += characters.charAt(
-        Math.floor(Math.random() * characters.length)
+      // Filter applicable and active offers
+      applicableOffers = activeOffers.filter(
+        (offer) =>
+          offer.isActive && // Check if the offer is active
+          offer.offerType === "Product" &&
+          String(offer.applicableProduct) === String(product._id)
       );
-    }
-    return orderID;
-  };
 
-  return {
-    order_id: generateOrderID(),
-    product: {
-      productId: product._id,
-      brand: product.brand,
-      productName: product.productName,
-      imageUrl: product.imageUrl[0],
-    },
-    variant: {
-      variantId: variant._id,
-      color: variant.color,
-      discountPrice: discountPrice, // Single unit price
-    },
-    quantity: item.quantity,
-    orderStatus: "Processing",
-    offerType: bestOffer.offerType || null,
-    offerTitle: bestOffer.title || null,
-    offerPercentage,
-    offerAmount, // Total offer amount
-    priceAfterOffer, // Total price after applying the offer
-    priceWithoutOffer, // Total price without applying any offer
-    itemTotalPrice, // Total price after applying the offer
-    priceWithoutCoupon: priceWithoutOffer, // Total price without applying any coupon
-    CouponAmountOfItem, // Total coupon amount for this item
-    priceAfterCoupon, // Total price after applying coupon
-  };
-});
+      if (product.categoriesId) {
+        const categoryOffers = offers.filter(
+          (offer) =>
+            offer.isActive && // Check if the offer is active
+            offer.offerType === "Category" &&
+            String(offer.applicableCategory) === String(product.categoriesId)
+        );
+        applicableOffers = applicableOffers.concat(categoryOffers);
+      }
+
+      // Determine the best offer
+      if (applicableOffers.length > 0) {
+        bestOffer = applicableOffers.reduce((max, current) =>
+          current.discountPercentage > max.discountPercentage ? current : max
+        );
+      }
+
+      // Calculate totals based on the quantity
+      const offerPercentage = bestOffer.discountPercentage || 0;
+      const offerAmount = ((discountPrice * offerPercentage) / 100) * item.quantity; // Total offer amount
+      const priceAfterOffer =
+        (discountPrice - (discountPrice * offerPercentage) / 100) * item.quantity; // Total price after offer
+      const priceWithoutOffer = discountPrice * item.quantity; // Total price without offer
+      const itemTotalPrice = priceAfterOffer; // Total price after offer
+      const CouponAmountOfItem = 0; // Initialize as 0
+      const priceAfterCoupon = itemTotalPrice - CouponAmountOfItem; // Price after coupon
+
+      // Update running totals
+      subtotal += priceWithoutOffer;
+      totalOfferValue += offerAmount;
+
+      // Generate a unique order ID
+      const generateOrderID = () => {
+        const characters =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let orderID = "#";
+        for (let i = 0; i < 5; i++) {
+          orderID += characters.charAt(
+            Math.floor(Math.random() * characters.length)
+          );
+        }
+        return orderID;
+      };
+
+      return {
+        order_id: generateOrderID(),
+        product: {
+          productId: product._id,
+          brand: product.brand,
+          productName: product.productName,
+          imageUrl: product.imageUrl[0],
+        },
+        variant: {
+          variantId: variant._id,
+          color: variant.color,
+          discountPrice: discountPrice, // Single unit price
+        },
+        quantity: item.quantity,
+        orderStatus: "Processing",
+        offerType: bestOffer.offerType || null,
+        offerTitle: bestOffer.title || null,
+        offerPercentage,
+        offerAmount, // Total offer amount
+        priceAfterOffer, // Total price after applying the offer
+        priceWithoutOffer, // Total price without applying any offer
+        itemTotalPrice, // Total price after applying the offer
+        priceWithoutCoupon: priceWithoutOffer, // Total price without applying any coupon
+        CouponAmountOfItem, // Total coupon amount for this item
+        priceAfterCoupon, // Total price after applying coupon
+      };
+    });
 
 
 
@@ -390,9 +406,58 @@ const orderItems = cartItems.map((item) => {
     await newOrder.save();
     await Cart.deleteMany({ userId });
 
-    if (paymentMethod === "Online Payment") {
+    //Wallet
+    if (paymentMethod === "Wallet") {
+      // Find the user's wallet
+      let wallet = await Wallet.findOne({ userId});
+      if (!wallet) {
+        return res.status(400).json({
+          success: false,
+          message: "Wallet not found. Please contact support.",
+        });
+      }
+
+      // Check if the wallet has sufficient balance
+      if (wallet.balance_amount < totalPrice) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Insufficient wallet balance. Please add funds to your wallet.",
+        });
+      }
+
+      // Deduct the amount from the wallet
+      wallet.balance_amount -= totalPrice;
+      wallet.transactions.push({
+        transactionType: "DEBIT",
+        amount: totalPrice,
+        transactionDate: new Date(),
+      });
+
+      // Save the wallet update
+      await wallet.save();
+
+      // Mark the order as paid
+      newOrder.payment = {
+        paymentMethod: "Wallet",
+        paymentStatus: "Paid",
+      };
+
+      // Save the order
+      await newOrder.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Order placed successfully using wallet payment!",
+        orderId: newOrder._id,
+      });
+    } else if (paymentMethod === "Online Payment") {
+
+      const amountInPaise = Math.round(totalPrice * 100);
+
+
       const razorpayOrder = await razorpay.orders.create({
-        amount: totalPrice * 100,
+        amount: amountInPaise,
         currency: "INR",
         receipt: newOrder._id.toString(),
       });
