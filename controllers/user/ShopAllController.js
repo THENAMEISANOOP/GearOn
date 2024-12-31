@@ -61,6 +61,7 @@ exports.shopAll = async (req, res) => {
     }
 };
 
+
 exports.getFilterOptions = async (req, res) => {
     try {
         const brands = await Product.distinct("brand");
@@ -102,6 +103,7 @@ exports.getFilterOptions = async (req, res) => {
         res.status(500).json({ error: "Failed to fetch filter options" });
     }
 };
+
 
 exports.searchAndFilterProducts = async (req, res) => {
     try {

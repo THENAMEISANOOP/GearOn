@@ -6,10 +6,10 @@ const checkSession = require("../middleware/checkSession");
 const adminAuthenticated = require("../middleware/adminauthmildware");
 const checkUserStatus = require("../middleware/checkUserStatus");
 
-// router.use((req, res, next) => {
-//     req.session.admin = true;
-//     next();
-// });
+router.use((req, res, next) => {
+    req.session.admin = true;
+    next();
+});
 
 // Admin login page
 router.get("/login", checkSession, adminController.getLogin);
@@ -18,6 +18,7 @@ router.post("/login", adminController.postLogin);
 router.post("/logout", adminAuthenticated, adminController.logout);
 // Admin dashboard
 router.get("/dashboard", adminAuthenticated, adminController.getDashboard);
+router.get("/dashboard/data", adminAuthenticated, adminController.getDashboardData);
 // Admin  Customers
 router.get("/customers",adminController.getCustomers);
 router.post("/customers/unblock/:id", adminController.unblockCustomer);

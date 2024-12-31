@@ -1,38 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Shop All</title>
-    <%- include("partials/headerHTML") %>
 
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Shop All</title>
+  <%- include("partials/headerHTML") %>
 
-  <body class="bg-gray-900">
-    <%- include("partials/dashboardNavbar") %>
-        <div class="mt-16"></div>
+</head>
+
+<body class="bg-gray-900">
+  <%- include("partials/navBar") %>
+    <div class="mt-16"></div>
 
     <!-- Breadcrumb -->
-    <div class="bg-gray-900 pt-12">
+    <div class="bg-gray-900 pt-4">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <nav class="text-sm font-medium text-white  " aria-label="Breadcrumb">
+        <nav class="text-sm font-medium text-white" aria-label="Breadcrumb">
           <ol class="flex items-center space-x-2">
             <!-- Home Link -->
             <li>
-              <a
-                href="/"
-                class="text-white hover:text-yellow-500 transition"
-              >
+              <a href="/home" class="text-white hover:text-yellow-500 transition">
                 Home
               </a>
             </li>
             <!-- Separator -->
             <li>
-              <span class="text-white">/</span>
+              <span class="text-gray-400">/</span>
             </li>
             <!-- Current Page -->
-            <li class="text-white">Shop All</li>
+            <li class="text-gray-500">Shop All</li>
           </ol>
         </nav>
       </div>
@@ -41,27 +39,19 @@
     <!-- Page Content -->
     <div class="bg-gray-900">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-white mb-8 text-center">
+        <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
           Shop All
         </h2>
 
         <div class="flex flex-col md:flex-row gap-8">
           <!-- Left Sidebar - Filters -->
           <div class="md:w-1/4">
-            <div
-              class="sticky top-4 space-y-6 bg-gray-400 p-6 rounded-lg shadow-sm"
-            >
+            <div class="sticky top-4 space-y-6 bg-yellow-100 p-6 rounded-lg shadow-sm">
               <!-- Sorting Section -->
               <div class="mb-6">
-                <label
-                  for="sortFilter"
-                  class="block text-gray-700 font-medium mb-2"
-                  >Sort By</label
-                >
-                <select
-                  id="sortFilter"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900"
-                >
+                <label for="sortFilter" class="block text-gray-700 font-medium mb-2">Sort By</label>
+                <select id="sortFilter"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900">
                   <option value="default">Default</option>
                   <option value="priceLowToHigh">Price: Low to High</option>
                   <option value="priceHighToLow">Price: High to Low</option>
@@ -73,97 +63,60 @@
               <!-- Filter Section -->
               <div class="space-y-4">
                 <div>
-                  <label
-                    for="model"
-                    class="block text-gray-700 font-medium mb-2"
-                    >Model</label
-                  >
-                  <select
-                    id="model"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900"
-                  >
+                  <label for="model" class="block text-gray-700 font-medium mb-2">model</label>
+                  <select id="model"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900">
                     <option value>All</option>
-                    <option value="RC125">RC125</option>
-                    <option value="RC200">RC200</option>
                     <option value="RC390">RC390</option>
-                    <option value="DUKE125">DUKE125</option>
-                    <option value="DUKE200">DUKE200</option>
+                    <option value="RC200">RC200</option>
+                    <option value="RC125">RC125</option>
                     <option value="DUKE390">DUKE390</option>
+                    <option value="DUKE200">DUKE200</option>
+                    <option value="DUKE125">DUKE125</option>
                   </select>
                 </div>
 
                 <div>
-                  <label
-                    for="category"
-                    class="block text-gray-700 font-medium mb-2"
-                    >Category</label
-                  >
-                  <select
-                    id="category"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900"
-                  >
+                  <label for="category" class="block text-gray-700 font-medium mb-2">Category</label>
+                  <select id="category"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900">
                     <option value>All</option>
                   </select>
                 </div>
 
                 <div>
-                  <label
-                    for="brand"
-                    class="block text-gray-700 font-medium mb-2"
-                    >Brand</label
-                  >
-                  <select
-                    id="brand"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900"
-                  >
+                  <label for="brand" class="block text-gray-700 font-medium mb-2">Brand</label>
+                  <select id="brand"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900">
                     <option value>All</option>
                   </select>
                 </div>
 
                 <div>
-                  <label
-                    for="color"
-                    class="block text-gray-700 font-medium mb-2"
-                    >Color</label
-                  >
-                  <select
-                    id="color"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900"
-                  >
+                  <label for="color" class="block text-gray-700 font-medium mb-2">Color</label>
+                  <select id="color"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900">
                     <option value>All</option>
                   </select>
                 </div>
 
                 <div>
-                  <label class="block text-gray-700 font-medium mb-2"
-                    >Price Range</label
-                  >
+                  <label class="block text-gray-700 font-medium mb-2">Price Range</label>
                   <div class="flex gap-2">
-                    <input
-                      type="number"
-                      id="minPrice"
+                    <input type="number" id="minPrice"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900"
-                      placeholder="Min"
-                    />
-                    <input
-                      type="number"
-                      id="maxPrice"
+                      placeholder="Min" />
+                    <input type="number" id="maxPrice"
                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900"
-                      placeholder="Max"
-                    />
+                      placeholder="Max" />
                   </div>
+
                 </div>
 
                 <div>
-                  <label
-                    for="stockFilter"
-                    class="block text-gray-700 font-medium mb-2"
-                    >Stock Status</label
-                  >
-                  <select
-                    id="stockFilter"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900"
-                  >
+                  <label for="stockFilter" class="block text-gray-700 font-medium mb-2">Stock Status</label>
+                  <select id="stockFilter"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-2 focus:border-gray-900">
                     <option value>All Products</option>
                     <option value="inStock">In Stock</option>
                     <option value="outOfStock">Out of Stock</option>
@@ -171,12 +124,14 @@
                 </div>
               </div>
 
-              <!-- Reset Button -->
+              <!-- Filter and Reset Button -->
               <div class="mt-6">
-                <button
-                  id="resetButton"
-                  class="px-4 py-2 bg-yellow-400  rounded-lg transform transition-transform duration-300 ease-in-out hover:bg-yellow-600 hover:scale-105 active:bg-zinc-700 active:scale-95"
-                >
+                <button type="button"
+                  class="mt-2 px-8 py-2 mr-2 bg-gray-900 text-white rounded-lg transform transition-transform duration-300 ease-in-out hover:bg-zinc-600 hover:scale-105 active:bg-zinc-700 active:scale-95">
+                  Filter
+                </button>
+                <button id="resetButton"
+                  class="px-4 py-2  bg-gray-900 text-white rounded-lg transform transition-transform duration-300 ease-in-out hover:bg-zinc-600 hover:scale-105 active:bg-zinc-700 active:scale-95">
                   Reset Filters
                 </button>
               </div>
@@ -186,89 +141,77 @@
           <!-- Right Side - Product Grid -->
           <div class="md:w-3/4">
             <!-- Search Bar -->
-            <div class="mb-6 flex-1 ">
+            <div class="mb-6 flex-1">
               <div class="flex items-center">
-                <input
-                  type="text"
-                  id="searchInput"
+                <input type="text" id="searchInput"
                   class="h-10 flex-grow px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:border-2 focus:border-gray-900"
-                  placeholder="Search products..."
-                />
-                <button
-                  id="searchButton"
-                  class="h-10 px-4 py-2 bg-yellow-400  rounded-r-lg transform transition-transform duration-300 ease-in-out hover:bg-yellow-600 hover:scale-105 active:bg-zinc-700 active:scale-95"
-                >
+                  placeholder="Search products..." />
+                <button id="searchButton"
+                  class="h-10 px-4 py-2 bg-yellow-500 text-black rounded-r-lg transform transition-transform duration-300 ease-in-out hover:bg-yellow-600 hover:scale-105 active:bg-yellow-600 active:scale-95">
                   Search
                 </button>
               </div>
             </div>
 
-            <div
-              id="productGrid"
-              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <!-- Dynamic product rendering here -->
               <% products.forEach(product=> { %>
-              <div class="bg-white rounded-lg shadow-md p-4 flex flex-col">
-                <a href="/product/<%= product._id %>">
-                  <img
-                    class="w-full h-auto rounded-lg mb-4"
-                    src="<%= product.imageUrl %>"
-                    alt="<%= product.productName %>"
-                  />
-                </a>
-                <h3 class="text-lg font-semibold text-gray-800">
-                  <!-- <span class="font-bold"> <%= product.brand %> </span> -->
-                  <span class="text-gray-800">
-                    <%= product.productName %>
-                  </span>
-                </h3>
-                <div>
-                  <p class="ml-1 text-gray-800 font-medium">
-                    <%= product.color %>
-                  </p>
-                </div>
-                <div class="text-yellow-500 flex items-center">
-                  <i class="fa fa-star"></i>
-                  <p class="ml-1 text-gray-800 font-medium">
-                    <%= product.rating || 'No rating' %>
-                  </p>
-                </div>
-
-                <% if (product.price && product.discountPrice) { %>
-                <div class="flex gap-2">
-                  <div class="text-xl font-bold text-gray-900">
-                    ₹<%= product.discountPrice.toLocaleString() %>
-                  </div>
-                  <div class="text-gray-500 line-through mt-1">
-                    ₹<%= product.price.toLocaleString() %>
-                  </div>
-                </div>
-                <% } else { %>
-                <div class="text-xl font-bold text-gray-900">
-                  Price Not Available
-                </div>
-                <% } %>
-                <div class="flex justify-between items-center mt-4">
-                  <a
-                    href="javascript:void(0)"
-                    class="hover:text-slate-500"
-                    onclick="addToWishlist('<%= product._id %>', '<%= product.variants_id %>')"
-                  >
-                    <i class="fa-regular fa-heart"></i>
+                <div
+                  class="bg-white rounded-lg shadow-md p-4 flex flex-col transition-transform transform hover:scale-105">
+                  <a href="/product/<%= product._id %>">
+                    <img class="w-full h-auto rounded-lg mb-4" src="<%= product.imageUrl %>"
+                      alt="<%= product.productName %>" />
                   </a>
-                  <% if (product.stock> 0) { %>
-                  <div class="mt-2 text-green-500"></div>
-                  <% } else { %>
-                  <div
-                    class="mt-2 font-semibold text-red-600 bg-red-100 border border-red-600 rounded-lg p-2"
-                  >
-                    Out of Stock
+                  <h3 class="text-lg font-semibold text-gray-800">
+                    <span class="font-bold">
+                      <%= product.brand %>
+                    </span>
+                    <span class="text-gray-800">
+                      <%= product.productName %>
+                    </span>
+                  </h3>
+                  <div>
+                    <p class="ml-1 text-gray-800 font-medium">
+                      <%= product.color %>
+                    </p>
                   </div>
-                  <% } %>
+                  <div class="text-yellow-500 flex items-center">
+                    <i class="fa fa-star"></i>
+                    <p class="ml-1 text-gray-800 font-medium">
+                      <%= product.rating || 'No rating' %>
+                    </p>
+                  </div>
+
+                  <% if (product.price && product.discountPrice) { %>
+                    <div class="flex gap-2">
+                      <div class="text-xl font-bold text-gray-900">
+                        ₹<%= product.discountPrice.toLocaleString() %>
+                      </div>
+                      <div class="text-gray-500 line-through mt-1">
+                        ₹<%= product.price.toLocaleString() %>
+                      </div>
+                    </div>
+                    <% } else { %>
+                      <div class="text-xl font-bold text-gray-900">
+                        Price Not Available
+                      </div>
+                      <% } %>
+                        <div class="flex justify-between items-center mt-4">
+                          <a href="javascript:void(0)" class="hover:text-slate-500"
+                            onclick="addToWishlist('<%= product._id %>', '<%= product.variants_id %>')">
+                            <i class="fa-regular fa-heart"></i>
+                          </a>
+                          <% if (product.stock> 0) { %>
+                            <div class="mt-2 text-green-500"></div>
+                            <% } else { %>
+                              <div
+                                class="mt-2 font-semibold text-red-600 bg-red-100 border border-red-600 rounded-lg p-2">
+                                Out of Stock
+                              </div>
+                              <% } %>
+                        </div>
                 </div>
-              </div>
-              <% }) %>
+                <% }) %>
             </div>
           </div>
         </div>
@@ -287,35 +230,62 @@
         },
       });
 
-  async function addToWishlist(productId, variantId) {
-      try {
+      document.addEventListener("DOMContentLoaded", () => {
+        updateWishlistBadge();
+
+      });
+
+      // Function to update the wishlist badge dynamically
+      async function updateWishlistBadge() {
+        try {
+          const response = await axios.get("/wishlist/totalCount"); // Fetch wishlist count
+          if (response.status === 200) {
+            const wishlistCount = response.data.wishlistCount || 0;
+
+            const wishlistBadge = document.getElementById("wishlistBadge");
+            if (wishlistBadge) {
+              wishlistBadge.textContent = wishlistCount; // Set the count
+              wishlistBadge.classList.toggle("hidden", wishlistCount === 0); // Hide if count is 0
+            }
+          }
+        } catch (error) {
+          console.error("Error updating wishlist badge:", error);
+        }
+      }
+
+
+
+      async function addToWishlist(productId, variantId) {
+        try {
           // Make a POST request to add the product to the wishlist
           const response = await fetch("/wishlist/add", {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ productId, variantId }),
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ productId, variantId }),
           });
 
           // Check if the request was successful
           if (response.ok) {
-              notyf.success("Product added to wishlist!");
+            updateWishlistBadge();
+
+            notyf.success("Product added to wishlist!");
           } else {
-              // Handle errors from the server
-              const errorData = await response.json();
-              if (errorData.error === "Product is already in your wishlist.") {
-                  notyf.success(errorData.error); // Use info for non-critical notifications
-              } else {
-                  notyf.error(errorData.error || "Failed to add to wishlist.");
-              }
+            // Handle errors from the server
+            const errorData = await response.json();
+            if (errorData.error === "Product is already in your wishlist.") {
+              notyf.success(errorData.error); // Use info for non-critical notifications
+            } else {
+              notyf.error(errorData.error || "Failed to add to wishlist.");
+            }
           }
-      } catch (error) {
+        } catch (error) {
           // Handle network or unexpected errors
           console.error("Error adding to wishlist:", error);
           notyf.error("An error occurred while adding to wishlist.");
+        }
       }
-  }
 
       document.addEventListener("DOMContentLoaded", async () => {
         // Get all filter elements
@@ -419,7 +389,7 @@
             elements.productGrid.innerHTML = "";
             data.products.forEach((product) => {
               const productCard = `
-    <div class="bg-white rounded-lg shadow-md p-4 flex flex-col">
+    <div class="bg-white rounded-lg shadow-md p-4 flex flex-col transition-transform transform hover:scale-105">
       <a href="/product/${product._id}">
         <img 
           class="w-full h-auto rounded-lg mb-4" 
@@ -442,31 +412,30 @@
           ${product.rating || "No rating"}
         </p>
       </div>
-      ${
-        product.price && product.discountPrice
-          ? `
+      ${product.price && product.discountPrice
+                  ? `
         <div class="flex gap-2">
           <div class="text-xl font-bold text-gray-900">₹${product.discountPrice.toLocaleString()}</div>
           <div class="text-gray-500 line-through mt-1">₹${product.price.toLocaleString()}</div>
         </div>
       `
-          : `
+                  : `
         <div class="text-xl font-bold text-gray-900">Price Not Available</div>
       `
-      }
-      ${
-        product.stock > 0
-          ? `
+                }
+      ${product.stock > 0
+                  ? `
         <div class="mt-2 text-green-500"></div>
       `
-          : `
+                  : `
         <div class="mt-2 font-semibold text-red-600 bg-red-100 border border-red-600 rounded-lg p-2">
           Out of Stock
         </div>
       `
-      }
+                }
       <div class="flex justify-between items-center mt-4">
-        <a href="#" class="hover:text-slate-500">
+        <a href="javascript:void(0)" class="hover:text-slate-500"
+           onclick="addToWishlist('${product._id}', '${product.variants_id}')">
           <i class="fa-regular fa-heart"></i>
         </a>
       </div>
@@ -517,6 +486,8 @@
           elements.stockFilter,
           elements.sortFilter,
           elements.searchInput,
+          elements.minPrice,
+          elements.maxPrice,
         ].forEach((element) => {
           element.addEventListener("change", updateProducts);
         });
@@ -526,5 +497,6 @@
         elements.maxPrice.addEventListener("input", debouncedUpdateProducts);
       });
     </script>
-  </body>
+</body>
+
 </html>
