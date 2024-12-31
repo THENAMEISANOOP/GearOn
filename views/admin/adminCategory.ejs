@@ -165,6 +165,90 @@
 
 
         <script>
+         
+  function validateCategoryName(categoryName) {
+    const regex = /^[A-Z][A-Za-z]{0,9}$/;
+    if (!regex.test(categoryName)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Input',
+        text: 'Category name must start with a capital letter, have no leading spaces, and be less than 10 characters.',
+        confirmButtonText: 'OK'
+      });
+      return false;
+    }
+    return true;
+  }
+
+  document.getElementById('addCategoryForm').addEventListener('submit', function (e) {
+  const categoryName = document.getElementById('categoryName').value;
+  if (validateCategoryName(categoryName)) {
+    Swal.fire({
+      icon: 'success',
+      title: 'Success',
+      text: 'Category added successfully!',
+      confirmButtonText: 'OK'
+    });
+  } else {
+    e.preventDefault();
+  }
+});
+  document.getElementById('editCategoryForm').addEventListener('submit', function (e) {
+    const categoryName = document.getElementById('editCategoryName').value;
+    if (!validateCategoryName(categoryName)) {
+      e.preventDefault();
+    }
+  });
+
+  function openModal() {
+    document.getElementById('addCategoryModal').classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('addCategoryModal').classList.add('hidden');
+  }
+
+  function openEditModal(id, name) {
+    const form = document.getElementById('editCategoryForm');
+    form.action = '/admin/category/update/' + id;
+    document.getElementById('editCategoryName').value = name;
+    document.getElementById('editCategoryModal').classList.remove('hidden');
+  }
+
+  function closeEditModal() {
+    document.getElementById('editCategoryModal').classList.add('hidden');
+  }
+
+  function deleteCategory(id) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch('/admin/category/delete/' + id, {
+          method: 'POST'
+        }).then(() => {
+          window.location.reload();
+        }).catch(err => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: "Error deleting category",
+            confirmButtonText: 'OK'
+          });
+        });
+      }
+    });
+  }
+
+
+
+
+
           function openModal() {
             document.getElementById('addCategoryModal').classList.remove('hidden');
           }
