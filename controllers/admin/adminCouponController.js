@@ -1,18 +1,31 @@
-const Order = require("../../models/orderModel");
-const Variant = require("../../models/variantSchema");
-const Category = require("../../models/categoryModel");
-const Product = require("../../models/productSchema");
-const Offer = require("../../models/offerModel");
 const Coupon = require("../../models/couponModel");
+
+const validateCoupon = (couponType, couponValue, startDate, endDate) => {
+    if (couponType === "percentage") {
+        if (couponValue < 0 || couponValue > 100) {
+            return { error: "Discount percentage must be between 0 and 100." };
+        }
+    } else if (couponType === "flat" && couponValue < 0) {
+        return { error: "Flat discount amount cannot be negative." };
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+        return { error: "Start date cannot be after end date." };
+    }
+
+    if (new Date(endDate) < new Date()) {
+        return { error: "End date cannot be in the past." };
+    }
+
+    return { error: null };
+};
 
 exports.getAdminCoupon = async (req, res) => {
     try {
-        // Retrieve pagination parameters from the request
-        const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
-        const limit = 5; // Number of coupons to show per page
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
         const skip = (page - 1) * limit;
 
-        // Fetch coupons from the database with pagination
         const [coupons, totalCoupons] = await Promise.all([
             Coupon.find().skip(skip).limit(limit),
             Coupon.countDocuments(),
@@ -21,9 +34,9 @@ exports.getAdminCoupon = async (req, res) => {
         const totalPages = Math.ceil(totalCoupons / limit);
 
         res.render("admin/adminCoupon", {
-            coupons, // Pass fetched coupons
-            currentPage: page, // Current page
-            totalPages, // Total number of pages
+            coupons,
+            currentPage: page,
+            totalPages,
         });
     } catch (error) {
         console.error("Error fetching coupons:", error);
@@ -31,12 +44,8 @@ exports.getAdminCoupon = async (req, res) => {
     }
 };
 
-
-
-
 exports.addCoupon = async (req, res) => {
     try {
-        // Extract form data
         const {
             couponCode,
             couponType,
@@ -48,34 +57,12 @@ exports.addCoupon = async (req, res) => {
             isActive,
         } = req.body;
 
-        // Validate the coupon value based on the coupon type
-        if (couponType === "percentage") {
-            if (couponValue < 0 || couponValue > 100) {
-                return res
-                    .status(400)
-                    .json({ message: "Discount percentage must be between 0 and 100." });
-            }
-        } else if (couponType === "flat" && couponValue < 0) {
-            return res
-                .status(400)
-                .json({ message: "Flat discount amount cannot be negative." });
+        // Validate coupon data
+        const { error } = validateCoupon(couponType, couponValue, startDate, endDate);
+        if (error) {
+            return res.status(400).json({ message: error });
         }
 
-        // Validate the start and end dates
-        if (new Date(startDate) > new Date(endDate)) {
-            return res
-                .status(400)
-                .json({ message: "Start date cannot be after end date." });
-        }
-
-        // Validate that the end date is not in the past
-        if (new Date(endDate) < new Date()) {
-            return res
-                .status(400)
-                .json({ message: "End date cannot be in the past." });
-        }
-
-        // Create a new coupon
         const newCoupon = new Coupon({
             couponCode,
             couponType,
@@ -84,29 +71,22 @@ exports.addCoupon = async (req, res) => {
             startDate,
             endDate,
             perUserUsageLimit,
-            isActive: isActive === "on", // Convert checkbox value to boolean
+            isActive: isActive === "on",
         });
 
-        // Save to the database
         await newCoupon.save();
-
-        // Redirect to the coupon management page with success message
         res.redirect("/admin/coupon");
     } catch (error) {
         console.error("Error adding coupon:", error);
-        // Handle unique constraint or validation errors gracefully
         if (error.code === 11000) {
             return res.status(400).json({ message: "Coupon code must be unique." });
         }
-        res
-            .status(500)
-            .json({ message: "An error occurred while adding the coupon." });
+        res.status(500).json({ message: "An error occurred while adding the coupon." });
     }
 };
 
 exports.updateCoupon = async (req, res) => {
     try {
-        // Extract form data
         const {
             couponId,
             couponCode,
@@ -119,41 +99,17 @@ exports.updateCoupon = async (req, res) => {
             isActive,
         } = req.body;
 
-        // Find the coupon by ID
         const coupon = await Coupon.findById(couponId);
-
         if (!coupon) {
             return res.status(404).json({ message: "Coupon not found." });
         }
 
-        // Validate the coupon value based on the coupon type
-        if (couponType === "percentage") {
-            if (couponValue < 0 || couponValue > 100) {
-                return res
-                    .status(400)
-                    .json({ message: "Discount percentage must be between 0 and 100." });
-            }
-        } else if (couponType === "flat" && couponValue < 0) {
-            return res
-                .status(400)
-                .json({ message: "Flat discount amount cannot be negative." });
+        // Validate coupon data
+        const { error } = validateCoupon(couponType, couponValue, startDate, endDate);
+        if (error) {
+            return res.status(400).json({ message: error });
         }
 
-        // Validate the start and end dates
-        if (new Date(startDate) > new Date(endDate)) {
-            return res
-                .status(400)
-                .json({ message: "Start date cannot be after end date." });
-        }
-
-        // Validate that the end date is not in the past
-        if (new Date(endDate) < new Date()) {
-            return res
-                .status(400)
-                .json({ message: "End date cannot be in the past." });
-        }
-
-        // Update coupon data
         coupon.couponCode = couponCode;
         coupon.couponType = couponType;
         coupon.couponValue = couponValue;
@@ -161,39 +117,28 @@ exports.updateCoupon = async (req, res) => {
         coupon.startDate = startDate;
         coupon.endDate = endDate;
         coupon.perUserUsageLimit = perUserUsageLimit;
-        coupon.isActive = isActive === "on"; // Convert checkbox value to boolean
+        coupon.isActive = isActive === "on";
 
-        // Save the updated coupon
         await coupon.save();
-
-        // Redirect to the coupon management page with success message
         res.redirect("/admin/coupon");
     } catch (error) {
         console.error("Error updating coupon:", error);
-        res
-            .status(500)
-            .json({ message: "An error occurred while updating the coupon." });
+        res.status(500).json({ message: "An error occurred while updating the coupon." });
     }
 };
 
-
-
 exports.deleteCoupon = async (req, res) => {
     try {
-        const { couponId } = req.body; // Get couponId from the request body
+        const { couponId } = req.body;
+        console.log("Coupon ID to delete:", couponId);  // Check if couponId is received correctly
 
-        console.log("Deleting coupon with ID:", couponId); // Debug log
-
-        // Find and delete the coupon by ID
         const deletedCoupon = await Coupon.findByIdAndDelete(couponId);
-
         if (!deletedCoupon) {
             return res.status(404).json({ message: "Coupon not found." });
         }
 
-        console.log("Coupon deleted:", deletedCoupon); // Debug log
-
-        res.json({ success: true }); // Send success response
+        console.log("Coupon deleted:", deletedCoupon);
+        res.json({ success: true });
     } catch (error) {
         console.error("Error deleting coupon:", error);
         res.status(500).json({ message: "An error occurred while deleting the coupon." });

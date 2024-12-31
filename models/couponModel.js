@@ -6,6 +6,7 @@ const couponSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
+            index: true, // Added index for better query performance
         },
         couponType: {
             type: String,
@@ -27,6 +28,12 @@ const couponSchema = new mongoose.Schema(
         endDate: {
             type: Date,
             required: true,
+            validate: {
+                validator: function (v) {
+                    return v > this.startDate; // Ensures endDate is after startDate
+                },
+                message: "End date must be after start date",
+            },
         },
         perUserUsageLimit: {
             type: Number,
@@ -53,6 +60,9 @@ const couponSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
+// Add index for performance improvement on isActive
+couponSchema.index({ isActive: 1 });
+
 const Coupon = mongoose.model("Coupon", couponSchema);
 
- module.exports =Coupon
+module.exports = Coupon;

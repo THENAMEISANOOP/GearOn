@@ -71,11 +71,11 @@
                                     '<%= coupon.isActive %>'
                                 )">
                                         Edit
-                                    </button>
-                                    <button class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600"
-                                    onclick="deleteCoupon('<%= coupon._id %>')">
+                                        <button class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600"
+                                        onclick="deleteCoupon('<%= coupon._id %>')">
                                     Delete
                                 </button>
+                                
                                 
                                 </td>
                             </tr>
@@ -225,13 +225,24 @@
             </div>
         </main>
 
-        <script> 
-             document.getElementById("addCouponForm").addEventListener("submit", async function (event) {
+        <script>
+            // Add coupon form submission with error handling
+            document.getElementById("addCouponForm").addEventListener("submit", async function (event) {
                 event.preventDefault(); // Prevent default form submission
-
+        
                 const form = event.target;
                 const formData = new FormData(form);
-
+        
+                // Client-side validation before sending request
+                if (document.getElementById('addCouponValue').value <= 0 || document.getElementById('addMinimumPurchase').value <= 0) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Validation Error",
+                        text: "Coupon value and minimum purchase amount must be greater than 0.",
+                    });
+                    return;
+                }
+        
                 try {
                     const response = await fetch(form.action, {
                         method: form.method,
@@ -240,14 +251,17 @@
                             "Content-Type": "application/x-www-form-urlencoded",
                         },
                     });
-
+        
                     if (!response.ok) {
                         const errorData = await response.json();
+        
                         // Show SweetAlert for validation errors
+                        const errorMessages = errorData.errors.map(error => `${error.field}: ${error.message}`).join("\n");
+        
                         Swal.fire({
                             icon: "error",
                             title: "Validation Error",
-                            text: errorData.message, // Use the message from the server
+                            text: errorMessages, // Show all error messages
                         });
                     } else {
                         // Success alert
@@ -268,16 +282,24 @@
                     });
                 }
             });
-
-
-
-
+        
+            // Edit coupon form submission with error handling
             document.getElementById("editCouponForm").addEventListener("submit", async function (event) {
                 event.preventDefault(); // Prevent default form submission
-
+        
                 const form = event.target;
                 const formData = new FormData(form);
-
+        
+                // Client-side validation before sending request
+                if (document.getElementById('editCouponValue').value <= 0 || document.getElementById('editMinimumPurchase').value <= 0) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Validation Error",
+                        text: "Coupon value and minimum purchase amount must be greater than 0.",
+                    });
+                    return;
+                }
+        
                 try {
                     const response = await fetch(form.action, {
                         method: form.method,
@@ -286,13 +308,15 @@
                             "Content-Type": "application/x-www-form-urlencoded",
                         },
                     });
-
+        
                     if (!response.ok) {
                         const errorData = await response.json();
+                        const errorMessages = errorData.errors.map(error => `${error.field}: ${error.message}`).join("\n");
+        
                         Swal.fire({
                             icon: "error",
                             title: "Validation Error",
-                            text: errorData.message,
+                            text: errorMessages,
                         });
                     } else {
                         Swal.fire({
@@ -312,7 +336,7 @@
                     });
                 }
             });
-
+        
             function openEditCouponModal(id, code, type, value, minPurchase, startDate, endDate, perUserUsage, isActive) {
                 document.getElementById('editCouponId').value = id;
                 document.getElementById('editCouponCode').value = code;
@@ -325,19 +349,18 @@
                 document.getElementById('editIsActive').checked = isActive === 'true';
                 document.getElementById('editCouponModal').classList.remove('hidden');
             }
-
+        
             function closeEditCouponModal() {
                 document.getElementById('editCouponModal').classList.add('hidden');
             }
-
+        
             function openAddCouponModal() {
                 document.getElementById('addCouponModal').classList.remove('hidden');
             }
-
+        
             function closeAddCouponModal() {
                 document.getElementById('addCouponModal').classList.add('hidden');
             }
-
             function deleteCoupon(couponId) {
     Swal.fire({
         title: 'Are you sure?',
@@ -349,17 +372,15 @@
         confirmButtonText: 'Yes, delete it!',
     }).then((result) => {
         if (result.isConfirmed) {
-            // Proceed with the deletion
             fetch(`/admin/coupon/delete`, {
-                method: 'POST',
+                method: 'DELETE',  // Ensure this is DELETE method
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ couponId: couponId }) // Send couponId in request body
+                body: JSON.stringify({ couponId: couponId }),  // Ensure couponId is correctly passed
             })
             .then(response => response.json())
             .then(data => {
-                console.log("Server response:", data); // Debug log to see the response from the server
                 if (data.success) {
                     Swal.fire(
                         'Deleted!',
@@ -372,13 +393,16 @@
                 }
             })
             .catch(error => {
-                console.error("Fetch error:", error); // Debug log for fetch errors
+                console.error("Error during deletion:", error);  // Log to check error details
                 Swal.fire('Error!', 'There was an issue deleting the coupon. Please try again later.', 'error');
             });
         }
     });
 }
+
         </script>
+        
+        
 </body>
 
 </html>

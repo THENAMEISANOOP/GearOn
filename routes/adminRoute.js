@@ -77,14 +77,17 @@ router.post("/offer/add", adminOffer.addOffer);
 router.post("/offer/update", adminOffer.updateOffer);
 router.delete("/offer/delete/:offerId", adminOffer.deleteOffer);
 
-// Admin Coupon
+
+// coupon
 const adminCoupon = require("../controllers/admin/adminCouponController");
 const validateCoupon = require("../middleware/couponValidation");
 
 router.get("/coupon", adminCoupon.getAdminCoupon);
-router.post("/coupon/add", validateCoupon, adminCoupon.addCoupon); // Use the validation middleware
-router.post("/coupon/update", validateCoupon, adminCoupon.updateCoupon); // Use the validation middleware for update
-router.post("/coupon/delete", adminCoupon.deleteCoupon);
+router.post("/coupon/add", validateCoupon, adminCoupon.addCoupon);
+router.put("/coupon/update", validateCoupon, adminCoupon.updateCoupon);
+router.delete("/coupon/delete", adminCoupon.deleteCoupon);  // Correct DELETE route
+
+
 
 
 
