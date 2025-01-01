@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add Variant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"
-      rel="stylesheet"
-    /> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
   <body
     class="bg-black text-white min-h-screen flex items-center justify-center"
@@ -22,180 +18,162 @@
       <form id="variantForm" class="p-6 rounded-lg shadow-md" method="POST" action="/admin/products/add/variant">
         <div id="variantFormsContainer">
 
-        <input
-          type="hidden"
-          id="productId"
-          name="productId"
-          value="<%= productId %>"
-        />
-
-        <div class="mb-4">
-          <label for="color" class="block text-gray-400">Color</label>
           <input
-            type="text"
-            id="color"
-            name="color"
-            class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
+            type="hidden"
+            id="productId"
+            name="productId"
+            value="<%= productId %>"
           />
-        </div>
 
-        
-        <div class="mb-4">
-          <label for="stock" class="block text-gray-400"
-            >stock</label
+          <div class="mb-4">
+            <label for="color" class="block text-gray-400">Color</label>
+            <input
+              type="text"
+              id="color"
+              name="color"
+              class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label for="stock" class="block text-gray-400">Stock</label>
+            <input
+              type="number"
+              id="stock"
+              name="stock"
+              step="0.01"
+              class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label for="price" class="block text-gray-400">Price</label>
+            <input
+              type="number"
+              id="price"
+              name="price"
+              step="0.01"
+              class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label for="discountPrice" class="block text-gray-400">Discount Price</label>
+            <input
+              type="number"
+              id="discountPrice"
+              name="discountPrice"
+              step="0.01"
+              class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label for="discountPercentage" class="block text-gray-400">Discount Percentage</label>
+            <input
+              type="number"
+              id="discountPercentage"
+              name="discountPercentage"
+              step="0.01"
+              class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label for="rating" class="block text-gray-400">Rating</label>
+            <input
+              type="number"
+              id="rating"
+              name="rating"
+              step="0.1"
+              min="0"
+              max="5"
+              class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200"
           >
-          <input
-            type="number"
-            id="stock"
-            name="stock"
-            step="0.01"
-            class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+            Add
+          </button>
         </div>
-
-        <div class="mb-4">
-          <label for="price" class="block text-gray-400">Price</label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            step="0.01"
-            class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            required
-          />
-        </div>
-
-        <div class="mb-4">
-          <label for="discountPrice" class="block text-gray-400"
-            >Discount Price</label
-          >
-          <input
-            type="number"
-            id="discountPrice"
-            name="discountPrice"
-            step="0.01"
-            class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div class="mb-4">
-          <label for="discountPercentage" class="block text-gray-400"
-            >Discount Percentage</label
-          >
-          <input
-            type="number"
-            id="discountPercentage"
-            name="discountPercentage"
-            step="0.01"
-            class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div class="mb-4">
-          <label for="rating" class="block text-gray-400">Rating</label>
-          <input
-            type="number"
-            id="rating"
-            name="rating"
-            step="0.1"
-            min="0"
-            max="5"
-            class="mt-1 block w-full px-3 py-2 border border-gray-600 bg-zinc-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-            <button
-          type="submit"
-          class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200">
-          Add
-        </button>
-              <!-- <button type="button" class="bg-indigo-600 ml-3 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200" onclick="addNewVariantForm()">
-        Add Another Variant</button> -->
-        
       </form>
-      
     </div>
 
-</div>
+    <script>
+      document.getElementById("variantForm").addEventListener("submit", function (e) {
+        const color = document.getElementById("color");
+        const price = document.getElementById("price");
+        const stock = document.getElementById("stock");
+        const discountPrice = document.getElementById("discountPrice");
+        const discountPercentage = document.getElementById("discountPercentage");
+        const rating = document.getElementById("rating");
+        let isValid = true;
 
+        // Reset all error messages and styles
+        color.classList.remove("border-red-500");
+        color.classList.add("border-gray-600");
 
-<script>
-  document.getElementById("variantForm").addEventListener("submit", function (e) {
-    const color = document.getElementById("color");
-    const price = document.getElementById("price");
-    const discountPrice = document.getElementById("discountPrice");
-    const discountPercentage = document.getElementById("discountPercentage");
-    const rating = document.getElementById("rating");
-    let isValid = true;
+        // Validate Color (only letters, length not greater than 7)
+        const colorRegex = /^[a-zA-Z]+$/; // Only letters allowed
+        if (!color.value.trim()) {
+          isValid = false;
+          color.classList.add("border-red-500");
+          Swal.fire("Error", "Color is required.", "error");
+        } else if (!colorRegex.test(color.value.trim())) {
+          isValid = false;
+          color.classList.add("border-red-500");
+          Swal.fire("Error", "Color should only contain letters.", "error");
+        } else if (color.value.trim().length > 7) {
+          isValid = false;
+          color.classList.add("border-red-500");
+          Swal.fire("Error", "Color length cannot exceed 7 characters.", "error");
+        }
 
-    // Reset all error messages and styles
-    color.classList.remove("border-red-500");
-    color.classList.add("border-gray-600");
-    document.getElementById("colorError").classList.add("hidden");
+        // Validate Price (ensure it's greater than 0)
+        if (!price.value.trim() || parseFloat(price.value) <= 0) {
+          isValid = false;
+          price.classList.add("border-red-500");
+          Swal.fire("Error", "Price must be greater than 0.", "error");
+        }
 
-    // Validate Color
-    if (!color.value.trim()) {
-      // If color field is empty
-      color.classList.add("border-red-500");
-      color.classList.remove("border-gray-600");
-      document.getElementById("colorError").classList.remove("hidden");
-      isValid = false;
-    } else if (!isNaN(color.value.trim())) { // If the color is a number (not allowed)
-      color.classList.add("border-red-500");
-      color.classList.remove("border-gray-600");
-      document.getElementById("colorError").classList.remove("hidden");
-      isValid = false;
-    }
+        // Validate Stock (ensure it's greater than 0)
+        if (!stock.value.trim() || parseFloat(stock.value) <= 0) {
+          isValid = false;
+          stock.classList.add("border-red-500");
+          Swal.fire("Error", "Stock must be greater than 0.", "error");
+        }
 
-    // Validate Price (ensure it's a positive number)
-    if (!price.value.trim() || parseFloat(price.value) <= 0) {
-      price.classList.add("border-red-500");
-      price.classList.remove("border-gray-600");
-      isValid = false;
-    } else {
-      price.classList.remove("border-red-500");
-      price.classList.add("border-gray-600");
-    }
+        // Validate Discount Price (optional, ensure it's a valid number and greater than 0)
+        if (discountPrice.value.trim() && parseFloat(discountPrice.value) < 0) {
+          isValid = false;
+          discountPrice.classList.add("border-red-500");
+          Swal.fire("Error", "Discount Price cannot be less than 0.", "error");
+        }
 
-    // Validate Discount Price (optional, ensure it's a valid number)
-    if (discountPrice.value.trim() && parseFloat(discountPrice.value) < 0) {
-      discountPrice.classList.add("border-red-500");
-      discountPrice.classList.remove("border-gray-600");
-      isValid = false;
-    } else {
-      discountPrice.classList.remove("border-red-500");
-      discountPrice.classList.add("border-gray-600");
-    }
+        // Validate Discount Percentage (optional, ensure it's between 0 and 100)
+        if (discountPercentage.value.trim() && (parseFloat(discountPercentage.value) < 0 || parseFloat(discountPercentage.value) > 100)) {
+          isValid = false;
+          discountPercentage.classList.add("border-red-500");
+          Swal.fire("Error", "Discount Percentage must be between 0 and 100.", "error");
+        }
 
-    // Validate Discount Percentage (optional, between 0 and 100)
-    if (discountPercentage.value.trim() && (parseFloat(discountPercentage.value) < 0 || parseFloat(discountPercentage.value) > 100)) {
-      discountPercentage.classList.add("border-red-500");
-      discountPercentage.classList.remove("border-gray-600");
-      isValid = false;
-    } else {
-      discountPercentage.classList.remove("border-red-500");
-      discountPercentage.classList.add("border-gray-600");
-    }
+        // Validate Rating (optional, between 0 and 5)
+        if (rating.value.trim() && (parseFloat(rating.value) < 0 || parseFloat(rating.value) > 5)) {
+          isValid = false;
+          rating.classList.add("border-red-500");
+          Swal.fire("Error", "Rating must be between 0 and 5.", "error");
+        }
 
-    // Validate Rating (optional, between 0 and 5)
-    if (rating.value.trim() && (parseFloat(rating.value) < 0 || parseFloat(rating.value) > 5)) {
-      rating.classList.add("border-red-500");
-      rating.classList.remove("border-gray-600");
-      isValid = false;
-    } else {
-      rating.classList.remove("border-red-500");
-      rating.classList.add("border-gray-600");
-    }
-
-    // If any validation fails, prevent form submission
-    if (!isValid) {
-      e.preventDefault(); // Prevent the form from submitting
-      alert("Please fill out the form correctly.");
-    }
-  });
-</script>
-
-
+        // If any validation fails, prevent form submission
+        if (!isValid) {
+          e.preventDefault(); // Prevent the form from submitting
+        }
+      });
+    </script>
   </body>
 </html>

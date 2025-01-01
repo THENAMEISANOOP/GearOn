@@ -141,55 +141,85 @@
 
 
 
-// validation 
+      
+  document.getElementById("productForm").addEventListener("input", function () {
+    const productName = document.getElementById("productName");
+    const brand = document.getElementById("brand");
 
-document.getElementById("productForm").addEventListener("input", function () {
-  const productName = document.getElementById("productName");
-  const brand = document.getElementById("brand");
+    // Regular expression to allow only letters (and spaces) for productName and brand
+    const lettersOnlyRegex = /^[A-Za-z\s]+$/;
 
-  // Validation for Product Name
-  if (!productName.value.trim()) {
-    productName.classList.add("border-red-500");
-    productName.classList.remove("border-gray-600");
-  } else {
-    productName.classList.remove("border-red-500");
-    productName.classList.add("border-gray-600");
-  }
-
-  // Validation for Brand
-  if (!brand.value.trim()) {
-    brand.classList.add("border-red-500");
-    brand.classList.remove("border-gray-600");
-  } else {
-    brand.classList.remove("border-red-500");
-    brand.classList.add("border-gray-600");
-  }
-  
-  // Check for spaces at the beginning of input and prevent it
-  if (productName.value.startsWith(" ")) {
-    productName.value = productName.value.trimStart(); // Remove leading space
-  }
-
-  if (brand.value.startsWith(" ")) {
-    brand.value = brand.value.trimStart(); // Remove leading space
-  }
-});
-
-document.getElementById("productForm").addEventListener("submit", function (e) {
-  const productName = document.getElementById("productName");
-  const brand = document.getElementById("brand");
-
-  // Check if fields are empty after trim and show validation
-  if (!productName.value.trim() || !brand.value.trim()) {
-    e.preventDefault();
-    // Optionally focus on the first invalid field
+    // Validation for Product Name
     if (!productName.value.trim()) {
-      productName.focus();
-    } else if (!brand.value.trim()) {
-      brand.focus();
+      productName.classList.add("border-red-500");
+      productName.classList.remove("border-gray-600");
+    } else if (productName.value.trim().length > 10) {
+      productName.classList.add("border-red-500");
+      productName.classList.remove("border-gray-600");
+      productName.setCustomValidity("Product name must not exceed 10 characters.");
+    } else if (!lettersOnlyRegex.test(productName.value.trim())) {
+      productName.classList.add("border-red-500");
+      productName.classList.remove("border-gray-600");
+      productName.setCustomValidity("Product name must only contain letters and spaces.");
+    } else {
+      productName.classList.remove("border-red-500");
+      productName.classList.add("border-gray-600");
+      productName.setCustomValidity(""); // Clear custom validation message
     }
-  }
-});
+
+    // Validation for Brand
+    if (!brand.value.trim()) {
+      brand.classList.add("border-red-500");
+      brand.classList.remove("border-gray-600");
+    } else if (brand.value.trim().length > 10) {
+      brand.classList.add("border-red-500");
+      brand.classList.remove("border-gray-600");
+      brand.setCustomValidity("Brand name must not exceed 10 characters.");
+    } else if (!lettersOnlyRegex.test(brand.value.trim())) {
+      brand.classList.add("border-red-500");
+      brand.classList.remove("border-gray-600");
+      brand.setCustomValidity("Brand name must only contain letters and spaces.");
+    } else {
+      brand.classList.remove("border-red-500");
+      brand.classList.add("border-gray-600");
+      brand.setCustomValidity(""); // Clear custom validation message
+    }
+
+    // Check for spaces at the beginning of input and prevent it
+    if (productName.value.startsWith(" ")) {
+      productName.value = productName.value.trimStart(); // Remove leading space
+    }
+
+    if (brand.value.startsWith(" ")) {
+      brand.value = brand.value.trimStart(); // Remove leading space
+    }
+  });
+
+  document.getElementById("productForm").addEventListener("submit", function (e) {
+    const productName = document.getElementById("productName");
+    const brand = document.getElementById("brand");
+
+    // Check if fields are empty after trim, invalid characters, or length exceeded, and show validation
+    if (!productName.value.trim() || !brand.value.trim() ||
+        productName.value.trim().length > 10 || brand.value.trim().length > 10 ||
+        !/^[A-Za-z\s]+$/.test(productName.value.trim()) || !/^[A-Za-z\s]+$/.test(brand.value.trim())) {
+      e.preventDefault();
+      // Optionally focus on the first invalid field
+      if (!productName.value.trim()) {
+        productName.focus();
+      } else if (!brand.value.trim()) {
+        brand.focus();
+      } else if (productName.value.trim().length > 10) {
+        productName.focus();
+      } else if (brand.value.trim().length > 10) {
+        brand.focus();
+      } else if (!/^[A-Za-z\s]+$/.test(productName.value.trim())) {
+        productName.focus();
+      } else if (!/^[A-Za-z\s]+$/.test(brand.value.trim())) {
+        brand.focus();
+      }
+    }
+  });
 
 
 
