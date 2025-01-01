@@ -282,17 +282,15 @@
                     });
                 }
             });
-        
-            document.getElementById("editCouponForm").addEventListener("submit", async function (event) {
-    event.preventDefault(); // Prevent default form submission
+            document.getElementById("editCouponForm").addEventListener("submit", async (event) => {
+    event.preventDefault(); // Prevent the form's default behavior
 
-    const form = event.target;
-    const formData = new FormData(form);
+    const formData = new FormData(event.target);
 
     try {
-        const response = await fetch(form.action, {
-            method: form.method,
-            body: new URLSearchParams(formData),  // Convert FormData to URL-encoded format
+        const response = await fetch(event.target.action, {
+            method: "PUT",
+            body: new URLSearchParams(formData),
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
@@ -302,40 +300,53 @@
             const errorData = await response.json();
             Swal.fire({
                 icon: "error",
-                title: "Validation Error",
-                text: errorData.message,
+                title: "Error",
+                text: errorData.message || "Failed to update the coupon.",
+            });
+            return;
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: data.message || "Coupon updated successfully!",
+            }).then(() => {
+                window.location.reload(); // Reload the page to show updated data
             });
         } else {
             Swal.fire({
-                icon: "success",
-                title: "Offer Updated",
-                text: "The offer has been successfully updated.",
-            }).then(() => {
-                window.location.reload(); // Reload the page or redirect
+                icon: "error",
+                title: "Error",
+                text: data.message || "Failed to update the coupon.",
             });
         }
     } catch (error) {
-        console.error("Error updating offer:", error);
+        console.error("Form submission error:", error);
         Swal.fire({
             icon: "error",
-            title: "Update Error",
-            text: "An error occurred while updating the offer. Please try again later.",
+            title: "Unexpected Error",
+            text: "An unexpected error occurred.",
         });
     }
 });
 
-            function openEditCouponModal(id, code, type, value, minPurchase, startDate, endDate, perUserUsage, isActive) {
-                document.getElementById('editCouponId').value = id;
-                document.getElementById('editCouponCode').value = code;
-                document.getElementById('editCouponType').value = type;
-                document.getElementById('editCouponValue').value = value;
-                document.getElementById('editMinimumPurchase').value = minPurchase;
-                document.getElementById('editStartDate').value = startDate;
-                document.getElementById('editEndDate').value = endDate;
-                document.getElementById('editPerUserUsageLimit').value = perUserUsage;
-                document.getElementById('editIsActive').checked = isActive === 'true';
-                document.getElementById('editCouponModal').classList.remove('hidden');
-            }
+
+
+function openEditCouponModal(id, code, type, value, minPurchase, startDate, endDate, perUserUsage, isActive) {
+    document.getElementById('editCouponId').value = id; // Ensure this is pre-filled
+    document.getElementById('editCouponCode').value = code;
+    document.getElementById('editCouponType').value = type;
+    document.getElementById('editCouponValue').value = value;
+    document.getElementById('editMinimumPurchase').value = minPurchase;
+    document.getElementById('editStartDate').value = startDate;
+    document.getElementById('editEndDate').value = endDate;
+    document.getElementById('editPerUserUsageLimit').value = perUserUsage;
+    document.getElementById('editIsActive').checked = isActive === 'true';
+    document.getElementById('editCouponModal').classList.remove('hidden');
+}
+
 
             function closeEditCouponModal() {
                 document.getElementById('editCouponModal').classList.add('hidden');

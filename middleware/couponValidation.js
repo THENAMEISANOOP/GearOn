@@ -2,18 +2,20 @@ const { check, validationResult } = require("express-validator");
 const Coupon = require("../models/couponModel");
 
 const validateCoupon = [
-    // Validate coupon code
     check("couponCode")
-        .notEmpty()
-        .withMessage("Coupon code is required.")
-        .isLength({ max: 10 })
-        .withMessage("Coupon code must not exceed 10 characters.")
-        .custom(async (couponCode) => {
-            const existingCoupon = await Coupon.findOne({ couponCode });
-            if (existingCoupon) {
-                throw new Error("Coupon code must be unique.");
-            }
-        }),
+    .notEmpty()
+    .withMessage("Coupon code is required.")
+    .isLength({ max: 10 })
+    .withMessage("Coupon code must not exceed 10 characters.")
+    .custom(async (couponCode, { req }) => {
+        const existingCoupon = await Coupon.findOne({ couponCode });
+
+        // Allow updates if the couponCode belongs to the current coupon
+        if (existingCoupon && existingCoupon._id.toString() !== req.body.couponId) {
+            throw new Error("Coupon code must be unique.");
+        }
+    }),
+
 
     // Validate coupon type
     check("couponType")

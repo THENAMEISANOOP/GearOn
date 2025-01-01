@@ -87,14 +87,16 @@ exports.addCoupon = async (req, res) => {
 
 exports.updateCoupon = async (req, res) => {
     try {
+        console.log(req.body); // Debug input data
         const { couponId, couponCode, couponType, couponValue, minimumPurchaseAmount, startDate, endDate, perUserUsageLimit, isActive } = req.body;
 
         // Validate the coupon data
         const { error } = validateCoupon(couponType, couponValue, startDate, endDate);
         if (error) {
-            return res.status(400).json({ message: error });
+            return res.status(400).json({ success: false, message: error });
         }
 
+        // Update coupon in the database
         const updatedCoupon = await Coupon.findByIdAndUpdate(
             couponId,
             {
@@ -105,19 +107,24 @@ exports.updateCoupon = async (req, res) => {
                 startDate,
                 endDate,
                 perUserUsageLimit,
-                isActive: isActive === "on",
+                isActive: isActive === "on", // Assuming checkbox-style input
             },
-            { new: true } // This option returns the updated document
+            { new: true }
         );
 
         if (!updatedCoupon) {
-            return res.status(404).json({ message: "Coupon not found." });
+            return res.status(404).json({ success: false, message: "Coupon not found." });
         }
 
-        res.json({ success: true, coupon: updatedCoupon });
+        // Successful update response
+        res.json({
+            success: true,
+            message: "Coupon updated successfully!",
+            coupon: updatedCoupon
+        });
     } catch (error) {
         console.error("Error updating coupon:", error);
-        res.status(500).json({ message: "An error occurred while updating the coupon." });
+        res.status(500).json({ success: false, message: "An error occurred while updating the coupon." });
     }
 };
 
