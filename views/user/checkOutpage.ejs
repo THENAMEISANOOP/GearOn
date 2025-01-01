@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
         integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -22,12 +21,12 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 
-<body class="bg-gray-50">
+<body class="bg-gray-900">
     <%- include("partials/navBar") %>
         <div class="mt-16"></div>
 
-        <div class="font-sans max-w-5xl mx-auto bg-gray-50 py-8">
-            <h1 class="text-3xl font-bold text-gray-800 text-center">Checkout</h1>
+        <div class="font-sans max-w-5xl mx-auto bg-gray-900 py-8">
+            <h1 class="text-3xl font-bold text-white text-center">Checkout</h1>
 
             <div class="grid md:grid-cols-3 gap-8 mt-8">
                 <!-- Left Section: Address and Payment -->
@@ -200,6 +199,7 @@
             <script>
                 let RedOrderId;
                 let subtotal = <%= totalAfterDiscount %>;
+                let subtotal_without_offer = <%= subtotal %>;
                 let totalDiscount = <%= totalDiscount %>;
                 let shippingCost = 0;
                 let couponValue = 0;
@@ -296,7 +296,7 @@
                         key: '<%= process.env.RAZORPAY_KEY_ID %>',
                         amount: order.amount,
                         currency: order.currency,
-                        name: "Urbantick",
+                        name: "GearOn",
                         description: "Order Payment",
                         order_id: order.id,
                         handler: function (response) {
@@ -365,7 +365,7 @@
                 // Handle coupon selection
                 function selectCoupon(couponCode, value, type) {
                     selectedCouponCode = couponCode;
-                    couponValue = type === 'percentage' ? (subtotal * value) / 100 : value;
+                    couponValue = type === 'percentage' ? (subtotal_without_offer * value) / 100 : value;
                     document.getElementById("applyCouponBtn").disabled = false;
                 }
 
