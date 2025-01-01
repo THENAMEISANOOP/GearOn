@@ -87,40 +87,34 @@ exports.addCoupon = async (req, res) => {
 
 exports.updateCoupon = async (req, res) => {
     try {
-        const {
-            couponId,
-            couponCode,
-            couponType,
-            couponValue,
-            minimumPurchaseAmount,
-            startDate,
-            endDate,
-            perUserUsageLimit,
-            isActive,
-        } = req.body;
+        const { couponId, couponCode, couponType, couponValue, minimumPurchaseAmount, startDate, endDate, perUserUsageLimit, isActive } = req.body;
 
-        const coupon = await Coupon.findById(couponId);
-        if (!coupon) {
-            return res.status(404).json({ message: "Coupon not found." });
-        }
-
-        // Validate coupon data
+        // Validate the coupon data
         const { error } = validateCoupon(couponType, couponValue, startDate, endDate);
         if (error) {
             return res.status(400).json({ message: error });
         }
 
-        coupon.couponCode = couponCode;
-        coupon.couponType = couponType;
-        coupon.couponValue = couponValue;
-        coupon.minimumPurchaseAmount = minimumPurchaseAmount;
-        coupon.startDate = startDate;
-        coupon.endDate = endDate;
-        coupon.perUserUsageLimit = perUserUsageLimit;
-        coupon.isActive = isActive === "on";
+        const updatedCoupon = await Coupon.findByIdAndUpdate(
+            couponId,
+            {
+                couponCode,
+                couponType,
+                couponValue,
+                minimumPurchaseAmount,
+                startDate,
+                endDate,
+                perUserUsageLimit,
+                isActive: isActive === "on",
+            },
+            { new: true } // This option returns the updated document
+        );
 
-        await coupon.save();
-        res.redirect("/admin/coupon");
+        if (!updatedCoupon) {
+            return res.status(404).json({ message: "Coupon not found." });
+        }
+
+        res.json({ success: true, coupon: updatedCoupon });
     } catch (error) {
         console.error("Error updating coupon:", error);
         res.status(500).json({ message: "An error occurred while updating the coupon." });

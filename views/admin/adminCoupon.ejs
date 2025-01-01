@@ -283,60 +283,47 @@
                 }
             });
         
-            // Edit coupon form submission with error handling
             document.getElementById("editCouponForm").addEventListener("submit", async function (event) {
-                event.preventDefault(); // Prevent default form submission
-        
-                const form = event.target;
-                const formData = new FormData(form);
-        
-                // Client-side validation before sending request
-                if (document.getElementById('editCouponValue').value <= 0 || document.getElementById('editMinimumPurchase').value <= 0) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Validation Error",
-                        text: "Coupon value and minimum purchase amount must be greater than 0.",
-                    });
-                    return;
-                }
-        
-                try {
-                    const response = await fetch(form.action, {
-                        method: form.method,
-                        body: new URLSearchParams(formData),
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                    });
-        
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        const errorMessages = errorData.errors.map(error => `${error.field}: ${error.message}`).join("\n");
-        
-                        Swal.fire({
-                            icon: "error",
-                            title: "Validation Error",
-                            text: errorMessages,
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: "success",
-                            title: "Offer Updated",
-                            text: "The offer has been successfully updated.",
-                        }).then(() => {
-                            window.location.reload(); // Reload the page or redirect
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error updating offer:", error);
-                    Swal.fire({
-                        icon: "error",
-                        title: "Update Error",
-                        text: "An error occurred while updating the offer. Please try again later.",
-                    });
-                }
+    event.preventDefault(); // Prevent default form submission
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(form.action, {
+            method: form.method,
+            body: new URLSearchParams(formData),  // Convert FormData to URL-encoded format
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            Swal.fire({
+                icon: "error",
+                title: "Validation Error",
+                text: errorData.message,
             });
-        
+        } else {
+            Swal.fire({
+                icon: "success",
+                title: "Offer Updated",
+                text: "The offer has been successfully updated.",
+            }).then(() => {
+                window.location.reload(); // Reload the page or redirect
+            });
+        }
+    } catch (error) {
+        console.error("Error updating offer:", error);
+        Swal.fire({
+            icon: "error",
+            title: "Update Error",
+            text: "An error occurred while updating the offer. Please try again later.",
+        });
+    }
+});
+
             function openEditCouponModal(id, code, type, value, minPurchase, startDate, endDate, perUserUsage, isActive) {
                 document.getElementById('editCouponId').value = id;
                 document.getElementById('editCouponCode').value = code;
@@ -349,18 +336,19 @@
                 document.getElementById('editIsActive').checked = isActive === 'true';
                 document.getElementById('editCouponModal').classList.remove('hidden');
             }
-        
+
             function closeEditCouponModal() {
                 document.getElementById('editCouponModal').classList.add('hidden');
             }
-        
+
             function openAddCouponModal() {
                 document.getElementById('addCouponModal').classList.remove('hidden');
             }
-        
+
             function closeAddCouponModal() {
                 document.getElementById('addCouponModal').classList.add('hidden');
             }
+
             function deleteCoupon(couponId) {
     Swal.fire({
         title: 'Are you sure?',

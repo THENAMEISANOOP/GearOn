@@ -297,208 +297,317 @@
       </div>
     </div>
 
+<!--------------------------Script------------------------------>
+<script>
+  const notyf = new Notyf({
+    duration: 3000,
+    position: {
+      x: "right",
+      y: "bottom",
+    },
+  });
 
-    <!--------------------------Script------------------------------>
-    <script>
-      const notyf = new Notyf({
-        duration: 3000,
-        position: {
-          x: "right",
-          y: "bottom",
-        },
-      });
+  //---------------Edit Address
 
-      //---------------Edit Address
-
-      function openEditModal(addressId) {
-        fetch(`/user/address/edit/${addressId}`)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.error) {
-              alert(data.error);
-              return;
-            }
-
-            // Populate modal fields
-            document.getElementById("editAddressId").value = addressId;
-            document.getElementById("editName").value = data.Name;
-            (document.getElementById("editHouseName").value = data.HouseName),
-              (document.getElementById("editLocalityStreet").value =
-                data.LocalityStreet),
-              (document.getElementById("editTownCity").value = data.TownCity),
-              (document.getElementById("editMobileNumber").value =
-                data.MobileNumber),
-              (document.getElementById("editstate").value = data.state),
-              (document.getElementById("editcountry").value = data.country),
-              (document.getElementById("editpincode").value = data.pincode),
-              // Show the modal
-              document
-                .getElementById("editAddressModal")
-                .classList.remove("hidden");
-          })
-          .catch((err) => console.error("Error fetching address:", err));
-      }
-
-      function closeEditModal() {
-        document.getElementById("editAddressModal").classList.add("hidden");
-      }
-
-      document
-        .getElementById("editAddressForm")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          const addressId = document.getElementById("editAddressId").value;
-          const updatedData = {
-            //Name: document.getElementById('editName').value,
-            Name: document.getElementById("editName").value.trim(),
-            HouseName: document.getElementById("editHouseName").value.trim(),
-            LocalityStreet: document
-              .getElementById("editLocalityStreet")
-              .value.trim(),
-            TownCity: document.getElementById("editTownCity").value.trim(),
-            MobileNumber: document
-              .getElementById("editMobileNumber")
-              .value.trim(),
-            state: document.getElementById("editstate").value.trim(),
-            country: document.getElementById("editcountry").value.trim(),
-            pincode: document.getElementById("editpincode").value.trim(),
-            // Include other fields here
-          };
-
-          fetch(`/user/address/edit/${addressId}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedData),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.error) {
-                alert(data.error);
-                return;
-              }
-
-              Swal.fire({
-                title: "Success!",
-                text: "Address added successfully",
-                icon: "success",
-                confirmButtonText: "OK",
-              }).then(async (result) => {
-
-
-                window.location.reload();
-              })
-              //window.location.reload(); // Reload to reflect changes
-            })
-            .catch((err) => console.error("Error updating address:", err));
-        });
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const showAddAddressForm =
-          document.getElementById("showAddAddressForm");
-        const addAddressForm = document.getElementById("addAddressForm");
-
-        if (showAddAddressForm) {
-          showAddAddressForm.addEventListener("click", (e) => {
-            e.preventDefault();
-            addAddressForm.classList.remove("hidden"); // Show the form
-          });
+  function openEditModal(addressId) {
+    fetch(`/user/address/edit/${addressId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          alert(data.error);
+          return;
         }
-      });
 
-      document.addEventListener("DOMContentLoaded", () => {
-        const deleteButtons = document.querySelectorAll(".deleteAddress");
+        // Populate modal fields
+        document.getElementById("editAddressId").value = addressId;
+        document.getElementById("editName").value = data.Name;
+        document.getElementById("editHouseName").value = data.HouseName;
+        document.getElementById("editLocalityStreet").value = data.LocalityStreet;
+        document.getElementById("editTownCity").value = data.TownCity;
+        document.getElementById("editMobileNumber").value = data.MobileNumber;
+        document.getElementById("editstate").value = data.state;
+        document.getElementById("editcountry").value = data.country;
+        document.getElementById("editpincode").value = data.pincode;
 
-        deleteButtons.forEach((button) => {
-          button.addEventListener("click", (e) => {
-            e.preventDefault();
-            const addressId = button.getAttribute("data-id");
+        // Show the modal
+        document.getElementById("editAddressModal").classList.remove("hidden");
+      })
+      .catch((err) => console.error("Error fetching address:", err));
+  }
 
-            Swal.fire({
-              title: "Are you sure?",
-              text: "You won't be able to revert this!",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#3085d6",
-              cancelButtonColor: "#d33",
-              confirmButtonText: "Yes, delete it!",
-            }).then((result) => {
-              if (result.isConfirmed) {
-                console.log(414141);
-                fetch(`/user/address/${addressId}`, {
-                  method: "DELETE",
-                  headers: { "Content-Type": "application/json" },
-                });
-                localStorage.setItem("addressDeleted", "true");
-                window.location.reload();
-              }
-            });
+  function closeEditModal() {
+    document.getElementById("editAddressModal").classList.add("hidden");
+  }
+
+  document
+    .getElementById("editAddressForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const addressId = document.getElementById("editAddressId").value;
+      const updatedData = {
+        Name: document.getElementById("editName").value.trim(),
+        HouseName: document.getElementById("editHouseName").value.trim(),
+        LocalityStreet: document
+          .getElementById("editLocalityStreet")
+          .value.trim(),
+        TownCity: document.getElementById("editTownCity").value.trim(),
+        MobileNumber: document
+          .getElementById("editMobileNumber")
+          .value.trim(),
+        state: document.getElementById("editstate").value.trim(),
+        country: document.getElementById("editcountry").value.trim(),
+        pincode: document.getElementById("editpincode").value.trim(),
+      };
+
+      fetch(`/user/address/edit/${addressId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          Swal.fire({
+            title: "Success!",
+            text: "Address updated successfully",
+            icon: "success",
+            confirmButtonText: "OK",
+          }).then(async (result) => {
+            window.location.reload();
           });
-        });
+        })
+        .catch((err) => console.error("Error updating address:", err));
+    });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const showAddAddressForm = document.getElementById("showAddAddressForm");
+    const addAddressForm = document.getElementById("addAddressForm");
+
+    if (showAddAddressForm) {
+      showAddAddressForm.addEventListener("click", (e) => {
+        e.preventDefault();
+        addAddressForm.classList.remove("hidden"); // Show the form
       });
-      if (localStorage.getItem("addressDeleted")) {
-        notyf.success("Address deleted successfully");
-        localStorage.removeItem("addressDeleted");
-      }
+    }
+  });
 
-      // Form validation and submission handling
-      document
-        .getElementById("addAddressFormContent")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
+  document.addEventListener("DOMContentLoaded", () => {
+    const deleteButtons = document.querySelectorAll(".deleteAddress");
 
-          // Reset all error messages
-          document
-            .querySelectorAll(".text-red-500")
-            .forEach((el) => el.classList.add("hidden"));
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", (e) => {
+        e.preventDefault();
+        const addressId = button.getAttribute("data-id");
 
-          // Validate all fields
-          let isValid = true;
-
-          // Prepare form data
-          const formData = {
-            userId: document.getElementById("userId").value,
-            Name: document.getElementById("Name").value.trim(),
-            HouseName: document.getElementById("HouseName").value.trim(),
-            LocalityStreet: document
-              .getElementById("LocalityStreet")
-              .value.trim(),
-            TownCity: document.getElementById("TownCity").value.trim(),
-            MobileNumber: document.getElementById("MobileNumber").value.trim(),
-            state: document.getElementById("state").value.trim(),
-            country: document.getElementById("country").value.trim(),
-            pincode: document.getElementById("pincode").value.trim(),
-          };
-
-          try {
-            const response = await axios.post("/user/address/add", formData);
-
-            if (response.status === 201) {
-              Swal.fire({
-                title: "Success!",
-                text: "Address added successfully",
-                icon: "success",
-                confirmButtonText: "OK",
-              }).then(async (result) => {
-                // Hide the form
-                document
-                  .getElementById("addAddressFormContent")
-                  .classList.add("hidden");
-
-                window.location.reload();
-              });
-            }
-          } catch (error) {
-            console.error("Error adding address:", error);
-            Swal.fire({
-              title: "Error",
-              text: "Failed to add address. Please try again later.",
-              icon: "error",
-              confirmButtonText: "OK",
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, delete it!",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`/user/address/${addressId}`, {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
             });
+            localStorage.setItem("addressDeleted", "true");
+            window.location.reload();
           }
         });
-    </script>
+      });
+    });
+  });
+
+  if (localStorage.getItem("addressDeleted")) {
+    notyf.success("Address deleted successfully");
+    localStorage.removeItem("addressDeleted");
+  }
+
+  // Validation function
+  function validateField(id, pattern, minLength, maxLength, errorMessageId, isAlphaOnly) {
+    const field = document.getElementById(id);
+    const value = field.value.trim();
+    let valid = true;
+
+    // Alpha only check
+    if (isAlphaOnly && /[^a-zA-Z\s]/.test(value)) {
+      valid = false; // invalid if any non-alphabetic character is found
+    }
+
+    // Numeric only check (for MobileNumber and Pincode)
+    if (!isAlphaOnly && /[^0-9]/.test(value)) {
+      valid = false; // invalid if any non-numeric character is found
+    }
+
+    // Length check
+    if (value.length < minLength || value.length > maxLength) {
+      valid = false;
+    }
+
+    // Show error message if invalid
+    if (!valid) {
+      document.getElementById(errorMessageId).classList.remove("hidden");
+    } else {
+      document.getElementById(errorMessageId).classList.add("hidden");
+    }
+    return valid;
+  }
+
+  // Form validation and submission handling
+  document
+    .getElementById("addAddressFormContent")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      // Reset all error messages
+      document
+        .querySelectorAll(".text-red-500")
+        .forEach((el) => el.classList.add("hidden"));
+
+      // Validate all fields
+      let isValid = true;
+
+      // Validate each field
+      isValid &= validateField('Name', null, 3, 50, 'nameError', true);  // Alpha-only validation for Name
+      isValid &= validateField('HouseName', null, 3, 100, 'houseError', true);  // Alpha-only validation for HouseName
+      isValid &= validateField('LocalityStreet', null, 3, 100, 'streetError', true);  // Alpha-only validation for LocalityStreet
+      isValid &= validateField('TownCity', null, 3, 50, 'cityError', true);  // Alpha-only validation for TownCity
+      isValid &= validateField('MobileNumber', /^[0-9]{10}$/, 10, 10, 'mobileError', false);  // Numeric validation for MobileNumber
+      isValid &= validateField('state', null, 3, 50, 'stateError', true);  // Alpha-only validation for state
+      isValid &= validateField('country', null, 2, 50, 'countryError', true);  // Alpha-only validation for country
+      isValid &= validateField('pincode', /^[0-9]{6}$/, 6, 6, 'pincodeError', false);  // Numeric validation for pincode
+
+      if (!isValid) {
+        return;
+      }
+
+      // Prepare form data
+      const formData = {
+        userId: document.getElementById("userId").value,
+        Name: document.getElementById("Name").value.trim(),
+        HouseName: document.getElementById("HouseName").value.trim(),
+        LocalityStreet: document
+          .getElementById("LocalityStreet")
+          .value.trim(),
+        TownCity: document.getElementById("TownCity").value.trim(),
+        MobileNumber: document.getElementById("MobileNumber").value.trim(),
+        state: document.getElementById("state").value.trim(),
+        country: document.getElementById("country").value.trim(),
+        pincode: document.getElementById("pincode").value.trim(),
+      };
+
+      try {
+        const response = await axios.post("/user/address/add", formData);
+
+        if (response.status === 201) {
+          Swal.fire({
+            title: "Success!",
+            text: "Address added successfully",
+            icon: "success",
+            confirmButtonText: "OK",
+          }).then(async (result) => {
+            document
+              .getElementById("addAddressFormContent")
+              .classList.add("hidden");
+            window.location.reload();
+          });
+        }
+      } catch (error) {
+        console.error("Error adding address:", error);
+        Swal.fire({
+          title: "Error",
+          text: "Failed to add address. Please try again later.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    });
+
+    
+    function validateForm() {
+        const name = document.getElementById('name').value;
+        const house = document.getElementById('house').value;
+        const street = document.getElementById('street').value;
+        const town = document.getElementById('town').value;
+        const state = document.getElementById('state').value;
+        const country = document.getElementById('country').value;
+        const pincode = document.getElementById('pincode').value;
+        const mobile = document.getElementById('mobile').value;
+
+        // Name Validation: only letters and spaces
+        const namePattern = /^[a-zA-Z\s]+$/;
+        if (!namePattern.test(name)) {
+            alert("Name should only contain letters and spaces.");
+            return false;
+        }
+
+        // House Validation: alphanumeric (letters and numbers)
+        const housePattern = /^[a-zA-Z0-9\s\#\-]+$/;
+        if (!housePattern.test(house)) {
+            alert("House should only contain letters, numbers, and spaces.");
+            return false;
+        }
+
+        // Street/Locality Validation: alphanumeric, letters, numbers, and spaces
+        const streetPattern = /^[a-zA-Z0-9\s,\.]+$/;
+        if (!streetPattern.test(street)) {
+            alert("Street/Locality should contain only letters, numbers, spaces, commas, or periods.");
+            return false;
+        }
+
+        // Town/City Validation: letters and spaces
+        const townPattern = /^[a-zA-Z\s]+$/;
+        if (!townPattern.test(town)) {
+            alert("Town/City should only contain letters and spaces.");
+            return false;
+        }
+
+        // State Validation: letters and spaces
+        const statePattern = /^[a-zA-Z\s]+$/;
+        if (!statePattern.test(state)) {
+            alert("State should only contain letters and spaces.");
+            return false;
+        }
+
+        // Country Validation: letters only
+        const countryPattern = /^[a-zA-Z\s]+$/;
+        if (!countryPattern.test(country)) {
+            alert("Country should only contain letters.");
+            return false;
+        }
+
+        // Pincode Validation: 6 digits
+        const pincodePattern = /^\d{6}$/;
+        if (!pincodePattern.test(pincode)) {
+            alert("Pincode should be 6 digits.");
+            return false;
+        }
+
+        // Mobile Validation: 10 digits
+        const mobilePattern = /^\d{10}$/;
+        if (!mobilePattern.test(mobile)) {
+            alert("Mobile number should be 10 digits.");
+            return false;
+        }
+
+        return true;  // All validations passed
+    }
+
+
+
+
+
+
+</script>
+
 </body>
 
 </html>

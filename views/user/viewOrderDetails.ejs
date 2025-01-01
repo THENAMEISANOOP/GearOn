@@ -1,38 +1,25 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Account</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- Material Icons -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-    integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.9/dist/sweetalert2.all.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+
+    <%- include("partials/headerHTML") %>
+
+</head>
 </head>
 
 <body class="bg-gray-900">
-  <%- include("partials/dashboardNavbar") %>
-    <div class="mt-16"></div>
+    <%- include("partials/navBar") %>
+        <div class="mt-16"></div>
 
-    <div class="flex min-h-screen bg-black">
-      <!-- Sidebar -->
-      <div class="fixed  bg-black">
-        <%- include("partials/userProfileSideBar") %>
-      </div>
+        <div class="flex min-h-screen bg-black">
+            <!-- Sidebar -->
+            <div class="fixed bg-black">
+                <%- include("partials/userProfileSideBar") %>
+            </div>
 
             <!-- Main Content -->
             <div class="flex-1 ml-64 bg-gray-900 p-6 shadow-md">
@@ -77,7 +64,7 @@
 
 
 
-                                            <div class="mt-6">
+                                                <div class="mt-6">
                                                     <button onclick="downloadInvoice('<%= order._id %>')"
                                                         class="w-1/6 bg-black hover:bg-zinc-800 text-white text-sm py-2 rounded-md">
                                                         Download Invoice
@@ -227,9 +214,53 @@
                 });
 
 
-                function downloadInvoice(orderId) {
-                    window.location.href = `/user/order/downloadInvoice/${orderId}`;
+
+
+                async function downloadInvoice(orderId) {
+                    try {
+                        const response = await fetch(`/user/order/downloadInvoice/${orderId}`);
+
+                        if (response.ok) {
+                            const blob = await response.blob(); // Get the response as a Blob
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = `invoice-${orderId}.pdf`; // Set the file name
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                            window.URL.revokeObjectURL(url);
+
+                            // Show success message
+                            Swal.fire({
+                                icon: "success",
+                                title: "Success",
+                                text: "Invoice downloaded successfully.",
+                                showConfirmButton: true,
+                                confirmButtonText: "OK",
+                            });
+                        } else {
+                            const errorData = await response.json();
+                            Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: errorData.message || "Failed to download invoice.",
+                                showConfirmButton: true,
+                                confirmButtonText: "OK",
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error downloading invoice:", error);
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "Something went wrong while downloading the invoice.",
+                            showConfirmButton: true,
+                            confirmButtonText: "OK",
+                        });
+                    }
                 }
+
 
 
                 // Cancel Order Item
@@ -380,7 +411,7 @@
                         key: '<%= process.env.RAZORPAY_KEY_ID %>',
                         amount: order.amount,
                         currency: order.currency,
-                        name: "GearOn",
+                        name: "Urbantick",
                         description: "Retry Payment",
                         order_id: order.id,
                         handler: function (response) {
