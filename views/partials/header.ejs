@@ -1,87 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Header</title>
-    
-    <!-- Font Awesome for Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modern Responsive Header</title>
 
-    <!-- Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    rel="stylesheet"
+  />
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const menuButton = document.getElementById('menu-button');
+  <!-- Tailwind -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+    rel="stylesheet"
+  />
 
-            menuButton.addEventListener('click', function() {
-                mobileMenu.classList.toggle('hidden');  // Toggle visibility
-            });
-        });
-    </script>
+  <style>
+    /* Smooth mobile menu animation */
+    .mobile-menu-enter {
+      max-height: 0;
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+    .mobile-menu-open {
+      max-height: 300px;
+      opacity: 1;
+    }
+
+    /* Dropdown animation */
+    .dropdown {
+      transform: translateY(10px);
+      opacity: 0;
+      transition: all 0.25s ease;
+    }
+    .group:hover .dropdown {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const menuBtn = document.getElementById("menu-button");
+      const mobileMenu = document.getElementById("mobile-menu");
+
+      menuBtn.addEventListener("click", () => {
+        mobileMenu.classList.toggle("mobile-menu-open");
+      });
+    });
+  </script>
 </head>
-<body>
-    <header class="bg-gray-900 text-white">
-        <div class="container mx-auto px-4 py-4 flex items-center justify-between lg:justify-start">
-            
-            <!-- Logo -->
-            <div class="flex items-center mr-8">
-                <img src="/images/gearon_logo.png" alt="Logo" class="h-16 w-full">
-            </div>
-            <!-- Search Box (Hidden on Small Screens) -->
-            <div class="relative flex-grow mx-8 hidden lg:block">
-                <input type="text" placeholder="Search for products" class="pl-10 pr-4 py-2 rounded bg-gray-800 border-none text-white focus:ring-2 focus:ring-yellow-500 w-full">
-                <span class="absolute left-2 top-2">
-                    <i class="fa fa-search text-gray-400"></i>
-                </span>
-            </div>
 
-            <!-- Navigation Links (Hidden on Small Screens) -->
-            <nav class="hidden lg:flex items-center space-x-8">
-                <div class="relative group">
-                    <!-- <button class="text-white hover:text-yellow-500">Shop by Bike</button> -->
-                    <div class="absolute hidden group-hover:block bg-gray-800 text-white shadow-lg p-2 mt-1">
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-700">Bike 1</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-700">Bike 2</a>
-                    </div>
-                </div>
-                <a href="#" class="hover:text-yellow-500">Explore</a>
-                <a href="#" class="hover:text-yellow-500">Category</a>
-                <a href="#" class="hover:text-yellow-500">About</a>
-                <a href="#" class="hover:text-yellow-500">Contact Us</a>
-            </nav>
+<body class="bg-gray-900 text-white">
 
-            <!-- Icons (User and Cart) -->
-            <div class="flex items-center gap-4 ml-8">
-                <a href="/user/login"><i class="fa fa-user text-xl hover:text-yellow-500"></i></a>
+  <header class="backdrop-blur-xl bg-gray-900/80 border-b border-gray-700">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
 
-                <i class="fa fa-shopping-cart text-xl hover:text-yellow-500"></i>
-            </div>
+      <!-- Logo -->
+      <div class="flex items-center gap-3">
+        <img src="/images/gearon_logo.png" class="h-14 w-auto" alt="Logo" />
+      </div>
 
-            <!-- Mobile Menu Icon -->
-            <button id="menu-button" class="lg:hidden text-white ml-4">
-                <i class="fa fa-bars text-2xl"></i>
-            </button>
+      <!-- Desktop Search -->
+      <div class="hidden lg:block flex-1 mx-8 relative">
+        <input
+          type="text"
+          placeholder="Search for products"
+          class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-800/70 border border-gray-700 focus:ring-2 focus:ring-yellow-500 transition"
+        />
+        <i class="fa fa-search absolute left-3 top-2.5 text-gray-400"></i>
+      </div>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden lg:flex items-center gap-8">
+        
+        <div class="relative group">
+          <button class="hover:text-yellow-500">Shop by Bike</button>
+
+          <div
+            class="dropdown absolute left-0 hidden group-hover:block bg-gray-800 rounded-lg shadow-xl p-2 mt-2 border border-gray-700"
+          >
+            <a href="#" class="block px-4 py-2 hover:bg-gray-700 rounded">Bike 1</a>
+            <a href="#" class="block px-4 py-2 hover:bg-gray-700 rounded">Bike 2</a>
+          </div>
         </div>
 
-        <!-- Mobile Menu (Visible on Small Screens) -->
-        <div id="mobile-menu" class="lg:hidden bg-gray-800 text-white hidden space-y-2 px-4 py-2">
-           
-            <a href="#" class="block hover:bg-gray-700 py-2">Explore</a>
-            <a href="#" class="block hover:bg-gray-700 py-2">Category</a>
-            <a href="#" class="block hover:bg-gray-700 py-2">About</a>
-            <a href="#" class="block hover:bg-gray-700 py-2">Contact Us</a>
-        </div>
+        <a class="hover:text-yellow-500" href="#">Explore</a>
+        <a class="hover:text-yellow-500" href="#">Category</a>
+        <a class="hover:text-yellow-500" href="#">About</a>
+        <a class="hover:text-yellow-500" href="#">Contact Us</a>
+      </nav>
 
-        <!-- Mobile Search Box -->
-        <div class="lg:hidden relative mt-4 px-4">
-            <input type="text" placeholder="Search for products" class="pl-10 pr-4 py-2 rounded bg-gray-800 border-none text-white focus:ring-2 focus:ring-yellow-500 w-full">
-            <span class="absolute left-2 top-2">
-                <i class="fa fa-search text-gray-400"></i>
-            </span>
-        </div>
-    </header>
+      <!-- Icons -->
+      <div class="flex items-center gap-6">
+        <a href="/user/login">
+          <i class="fa fa-user text-xl hover:text-yellow-500 transition"></i>
+        </a>
+        <i class="fa fa-shopping-cart text-xl hover:text-yellow-500 transition"></i>
+
+        <!-- Mobile Toggle -->
+        <button id="menu-button" class="lg:hidden">
+          <i class="fa fa-bars text-2xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div
+      id="mobile-menu"
+      class="mobile-menu-enter lg:hidden overflow-hidden bg-gray-800/90 border-t border-gray-700"
+    >
+      <div class="px-4 py-4 space-y-2">
+        <a href="#" class="block py-2 hover:text-yellow-400">Explore</a>
+        <a href="#" class="block py-2 hover:text-yellow-400">Category</a>
+        <a href="#" class="block py-2 hover:text-yellow-400">About</a>
+        <a href="#" class="block py-2 hover:text-yellow-400">Contact Us</a>
+      </div>
+
+      <!-- Mobile Search -->
+      <div class="px-4 pb-4 relative">
+        <input
+          type="text"
+          placeholder="Search for products"
+          class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-yellow-500 transition"
+        />
+        <i class="fa fa-search absolute left-6 top-3 text-gray-400"></i>
+      </div>
+    </div>
+  </header>
+
 </body>
 </html>
