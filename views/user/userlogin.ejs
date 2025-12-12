@@ -3,92 +3,157 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <title>User login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
+    <title>User Login</title>
 
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
       crossorigin="anonymous"
-      referrerpolicy="no-referrer"
     />
+
+    <!-- Google Auth -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta
+      name="google-signin-client_id"
+      content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+    />
+
+    <style>
+      /* Page fade-in */
+      body {
+        animation: fadeIn 0.7s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Glass card animation */
+      .glass-card {
+        animation: slideUp 0.6s ease-out;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
   </head>
 
-  <body class="bg-black">
-    <!------------ Navbar ---------->
-    <%- include("partials/navBar")  %>
-    <div class="mt-16"></div>
+  <body class="bg-black text-white min-h-screen">
 
-    <div class="flex justify-center p-6">
-      <div class="w-full max-w-sm p-6 bg-gray-900 rounded-lg shadow-md">
-          <h2 class="text-3xl font-bold text-center text-white mb-6">LOGIN</h2>
-          
-          <% if (typeof error !== 'undefined') { %>
-            <p class="text-red-500 text-sm text-center"><%= error %></p>
-          <% } %>
-  
-  
-          
-          <form id="loginForm"  action="/user/login" method="post">
-              <!-- Email Input -->
-              <div class="mb-4">
-                  <label class="block text-gray-400 text-sm font-bold mb-2" for="email">Email</label>
-                  <input 
-                      class="w-full px-3 py-2 text-gray-900 rounded-lg focus:outline-none focus:shadow-outline" 
-                      id="email" 
-                      type="email" 
-                      placeholder="Email" 
-                      name="email" 
-                      required>
-                  <p id="emailError" class="text-red-500 text-sm hidden">Please enter a valid email address.</p>
-              </div>
-  
-              <!-- Password Input -->
-              <div class="mb-6">
-                  <label class="block text-gray-400 text-sm font-bold mb-2" for="password">Password</label>
-                  <input 
-                      class="w-full px-3 py-2 text-gray-900 rounded-lg focus:outline-none focus:shadow-outline" 
-                      id="password" 
-                      type="password" 
-                      placeholder="Password" 
-                      name="password"
-                      required>
-                  <p id="passwordError" class="text-red-500 text-sm hidden">
-                      Password must be at least 8 characters long, include one special character, and one number.
-                  </p>
-                  <a class="inline-block align-baseline text-sm text-yellow-500 hover:text-yellow-700 mt-2" href="/user/forgotPassword">Forgot password?</a>
-              </div>
-  
-              <!-- Sign In Button -->
-              <div class="mb-6">
-                  <button 
-                      class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline" 
-                      type="submit">SIGN IN</button>
-              </div>
-  
-              <!-- Account Creation Link -->
-              <div class="text-center text-gray-400">
-                  New customer? <a class="text-yellow-500 hover:text-yellow-700" href="/user/signup">Create an account</a>
-              </div>
-  
-              <!-- Social Media Icons -->
-              <div class="flex justify-center mt-4">
-                  <!-- <a href="#" class="mx-2"><img src="https://img.icons8.com/color/48/000000/facebook-new.png" alt="Facebook"></a> -->
-                  <a href="/auth/google" class="mx-2"><img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google"></a>
-              </div>
-          </form>
+    <!-- Navbar -->
+    <%- include("partials/navBar") %>
+
+    <div class="pt-24 flex justify-center px-4">
+      <div
+        class="glass-card w-full max-w-md p-8 rounded-2xl bg-gray-900/80 backdrop-blur-xl border border-gray-700 shadow-2xl"
+      >
+        <h2 class="text-4xl font-bold text-center mb-6 tracking-wide">LOGIN</h2>
+
+        <% if (typeof error !== 'undefined') { %>
+          <p class="text-red-500 text-sm text-center mb-4"><%= error %></p>
+        <% } %>
+
+        <form id="loginForm" action="/user/login" method="post">
+
+          <!-- Email -->
+          <div class="mb-5">
+            <label class="text-gray-300 text-sm font-semibold">Email</label>
+            <div class="relative mt-1">
+              <input
+                id="email"
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                class="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white
+                       focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
+                required
+              />
+              <i class="fa fa-envelope absolute right-3 top-3 text-gray-400"></i>
+            </div>
+            <p id="emailError" class="text-red-500 text-sm hidden mt-1">
+              Enter a valid email.
+            </p>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-6">
+            <label class="text-gray-300 text-sm font-semibold">Password</label>
+            <div class="relative mt-1">
+              <input
+                id="password"
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                class="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white
+                       focus:ring-2 focus:ring-yellow-500 focus:outline-none transition"
+                required
+              />
+              <i class="fa fa-lock absolute right-3 top-3 text-gray-400"></i>
+            </div>
+            <p id="passwordError" class="text-red-500 text-sm hidden mt-1">
+              Password must be 8+ characters, include a number and a symbol.
+            </p>
+
+            <a
+              href="/user/forgotPassword"
+              class="text-yellow-500 hover:text-yellow-600 text-sm mt-2 inline-block"
+            >
+              Forgot password?
+            </a>
+          </div>
+
+          <!-- Button -->
+          <button
+            type="submit"
+            class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded-lg 
+                   transition transform hover:scale-[1.02] active:scale-[0.98]"
+          >
+            SIGN IN
+          </button>
+
+          <!-- Signup -->
+          <p class="text-center text-gray-400 mt-4">
+            New here?
+            <a href="/user/signup" class="text-yellow-500 hover:text-yellow-600">
+              Create an account
+            </a>
+          </p>
+
+          <!-- Google Login -->
+          <div class="flex justify-center mt-6">
+            <a href="/auth/google" class="hover:scale-105 transition">
+              <img
+                src="https://img.icons8.com/color/48/000000/google-logo.png"
+                class="w-10"
+              />
+            </a>
+          </div>
+        </form>
       </div>
     </div>
-  
 
-    <!------------- Footer ------------>
-    <%- include("partials/footer")  %>
+    <!-- Footer -->
+    <%- include("partials/footer") %>
 
     <script src="/javascript/user/loginFormValidation.js"></script>
-
   </body>
 </html>
